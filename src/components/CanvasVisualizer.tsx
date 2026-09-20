@@ -262,8 +262,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // Deep studio dark background
-      ctx.fillStyle = '#090d16';
+      // Deep studio dark background (matches the app's near-black base)
+      ctx.fillStyle = '#070a14';
       ctx.fillRect(0, 0, width, height);
 
       // Fetch raw data
@@ -312,7 +312,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         );
         const glowOpacity = Math.min(0.12, (metrics.bass / 1000)).toFixed(2);
         radialGlow.addColorStop(0, `rgba(6, 182, 212, ${glowOpacity})`);
-        radialGlow.addColorStop(1, 'rgba(9, 13, 22, 0)');
+        radialGlow.addColorStop(1, 'rgba(7, 10, 20, 0)');
         ctx.fillStyle = radialGlow;
         ctx.fillRect(0, 0, width, height);
       }
@@ -674,7 +674,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
 
           // Smooth depth fog to occlude background shapes completely
           const alphaFog = Math.min(0.98, 0.76 + depthVal * 0.22);
-          ctx.fillStyle = `rgba(9, 13, 22, ${alphaFog})`;
+          ctx.fillStyle = `rgba(7, 10, 20, ${alphaFog})`;
           ctx.fill();
 
           // 2. Draw Longitudinal Grid Lines (Z-axis connectors/ribbons) connecting back-to-front
@@ -931,7 +931,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
     <div
       ref={containerRef}
       id="spectrum-canvas-container"
-      className="relative w-full h-[440px] md:h-[520px] bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col group"
+      className="relative w-full h-[440px] md:h-[560px] bg-slate-950 rounded-2xl overflow-hidden flex flex-col group"
     >
       {/* Top Bar Floating Controls on Canvas */}
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10 pointer-events-auto">

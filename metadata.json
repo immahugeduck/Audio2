@@ -1,6 +1,6 @@
 {
-  "name": "Audio Spectrum Analyzer",
-  "description": "Real-time audio spectrum analyzer built with React and Web Audio API featuring frequency analysis, custom visualizers, file upload, mic input, and customizable color gradients.",
+  "name": "Audio2une",
+  "description": "Audio2une — a premium real-time audio spectrum analyzer built with React and the Web Audio API. Features multiple live graph modes (bars, spectral contour, 3D waterfall, heatmap, oscilloscope, dual scope), real-time level & spectral metering, mic and file/URL input, AI noise classification, and customizable neon color gradients.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

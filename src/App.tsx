@@ -21,7 +21,9 @@ import { HarmonicTuner } from './components/HarmonicTuner';
 import { EventAnomalyLog } from './components/EventAnomalyLog';
 import { UrlAudioAnalyzer } from './components/UrlAudioAnalyzer';
 import { MicSettingsSelector } from './components/MicSettingsSelector';
-import { Mic, Music, Volume2 } from 'lucide-react';
+import { GraphModeSwitcher } from './components/GraphModeSwitcher';
+import { LiveStatStrip } from './components/LiveStatStrip';
+import { Mic, Music } from 'lucide-react';
 
 export default function App() {
   const [settings, setSettings] = useState<VisualizerSettings>({
@@ -114,10 +116,12 @@ export default function App() {
     [loadAudioFile]
   );
 
+  const isLive = engineState.sourceType === 'mic' || engineState.isPlaying;
+
   return (
     <DropZone onFileDrop={handleFileDrop}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-cyan-500 selection:text-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+      <div className="min-h-screen text-slate-100 font-sans antialiased">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
 
           {/* Header */}
           <Header
@@ -127,43 +131,65 @@ export default function App() {
             onOpenReport={() => setIsReportOpen(true)}
           />
 
-          {/* Main Visualizer Top Stage Canvas - shared across both tabs, always
-              reflects whatever source is currently active (mic on Live, file/
-              sample on Media). */}
-          <CanvasVisualizer
-            settings={settings}
-            getFrequencyData={getFrequencyData}
-            getTimeDomainData={getTimeDomainData}
-            metrics={metrics}
-            isPlaying={engineState.isPlaying}
-          />
+          {/* ============ HERO STAGE ============ */}
+          {/* The spectrum analyzer is the centerpiece: a prominent graph-type
+              switcher, the live canvas, and a real-time telemetry strip, all
+              wrapped in a glowing neon stage. */}
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <h2 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,224,255,0.9)] animate-pulse" />
+                Live Spectrum Stage
+              </h2>
+              <span className="text-[11px] font-mono text-slate-500">
+                {settings.fftSize} bins &middot; {isLive ? 'streaming' : 'idle'}
+              </span>
+            </div>
+
+            {/* Prominent graph-option switcher */}
+            <GraphModeSwitcher settings={settings} updateSettings={updateSettings} />
+
+            {/* The analyzer canvas, framed with a neon ring */}
+            <div className="rounded-2xl neon-ring">
+              <CanvasVisualizer
+                settings={settings}
+                getFrequencyData={getFrequencyData}
+                getTimeDomainData={getTimeDomainData}
+                metrics={metrics}
+                isPlaying={engineState.isPlaying}
+              />
+            </div>
+
+            {/* Real-time level & spectral telemetry */}
+            <LiveStatStrip metrics={metrics} isLive={isLive} />
+          </section>
 
           {/* Tab Bar Navigation */}
-          <div className="flex bg-slate-900 border border-slate-800 p-1.5 rounded-2xl gap-2 shadow-lg self-center md:self-stretch">
+          <div className="flex glass border border-slate-800 p-1.5 rounded-2xl gap-2 shadow-lg self-center md:self-stretch">
             <button
               onClick={() => setActiveTab('live')}
               id="tab-btn-live-space"
-              className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'live'
-                  ? 'bg-gradient-to-r from-rose-500/20 to-pink-500/20 border border-rose-500/50 text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
+                  ? 'bg-gradient-to-r from-fuchsia-500/25 to-rose-500/20 border border-fuchsia-500/50 text-fuchsia-200 shadow-[0_0_16px_-4px_rgba(217,70,239,0.5)]'
                   : 'text-slate-400 hover:text-slate-200 border border-transparent hover:bg-slate-850'
               }`}
             >
-              <Mic className={`w-4 h-4 ${activeTab === 'live' ? 'text-rose-400 animate-pulse' : 'text-slate-400'}`} />
-              <span>Live Acoustic Space Analyzer</span>
+              <Mic className={`w-4 h-4 ${activeTab === 'live' ? 'text-fuchsia-300 animate-pulse' : 'text-slate-400'}`} />
+              <span>Live Acoustic Space</span>
             </button>
 
             <button
               onClick={() => setActiveTab('media')}
               id="tab-btn-media-analyzer"
-              className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'media'
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
+                  ? 'bg-gradient-to-r from-cyan-500/25 to-indigo-500/20 border border-cyan-500/50 text-cyan-200 shadow-[0_0_16px_-4px_rgba(34,224,255,0.5)]'
                   : 'text-slate-400 hover:text-slate-200 border border-transparent hover:bg-slate-850'
               }`}
             >
-              <Music className={`w-4 h-4 ${activeTab === 'media' ? 'text-cyan-400 animate-pulse' : 'text-slate-400'}`} />
-              <span>File &amp; YouTube Stream Analyzer</span>
+              <Music className={`w-4 h-4 ${activeTab === 'media' ? 'text-cyan-300 animate-pulse' : 'text-slate-400'}`} />
+              <span>File &amp; Stream Analyzer</span>
             </button>
           </div>
 
@@ -272,11 +298,7 @@ export default function App() {
                 on both tabs (no reason to duplicate this markup per tab - it
                 just reflects whatever source is currently active). */}
             <div className="lg:col-span-4 flex flex-col gap-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                  <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
-                  Visual Scale Options
-                </h3>
+              <div className="glass border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
                 <VisualizerControls settings={settings} updateSettings={updateSettings} />
               </div>
 
@@ -300,12 +322,14 @@ export default function App() {
           />
 
           {/* Footer */}
-          <footer className="pt-6 border-t border-slate-800/60 text-center text-xs text-slate-500 flex items-center justify-between flex-wrap gap-2">
-            <span>
-              Professional Audio Analysis Suite &bull; Web Audio API &bull; Gemini AI Noise Classifier
-            </span>
-            <div className="flex items-center gap-4 text-slate-400">
-              <span className="font-semibold text-cyan-500">Live Calibration Mode Default</span>
+          <footer className="mt-2">
+            <div className="neon-divider mb-4" />
+            <div className="text-center text-xs text-slate-500 flex items-center justify-between flex-wrap gap-2">
+              <span className="flex items-center gap-1.5">
+                <span className="font-display font-bold text-neon">Audio2une</span>
+                &bull; Web Audio API &bull; Gemini AI Noise Classifier
+              </span>
+              <span className="font-semibold text-cyan-400">Premium Spectrum Lab</span>
             </div>
           </footer>
 

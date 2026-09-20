@@ -1,1 +1,213 @@
+/* Audio2une — premium neon-spectrum design system.
+   Fonts must be imported before the Tailwind import (CSS @import ordering). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   THEME TOKENS
+   The whole app is re-skinned from here. Every panel uses Tailwind
+   `slate-*` / `cyan-*` utilities, so overriding those ramps below
+   restyles the entire UI at once into the neon-dark look.
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Neon-dark surface ramp (dark = low numbers, light text = high numbers) */
+  --color-slate-50: #f5f6fc;
+  --color-slate-100: #eceffa;
+  --color-slate-200: #d7dcf0;
+  --color-slate-300: #b4bbe0;
+  --color-slate-400: #888fb8;   /* section labels */
+  --color-slate-500: #656c96;   /* muted text */
+  --color-slate-600: #464d72;
+  --color-slate-700: #2a3048;   /* strong borders */
+  --color-slate-800: #1b2036;   /* borders / subtle surface */
+  --color-slate-850: #131728;   /* inner surface / hover */
+  --color-slate-900: #0c1020;   /* panel surface */
+  --color-slate-950: #060811;   /* app background */
+
+  /* Electric primary accent (kept in the cyan family so existing
+     `cyan-*` usages punch up instead of clashing) */
+  --color-cyan-300: #7bf3ff;
+  --color-cyan-400: #22e0ff;
+  --color-cyan-500: #06c4ef;
+  --color-cyan-600: #0499c6;
+
+  /* Motion */
+  --animate-fadeIn: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-shimmer: shimmer 3.5s linear infinite;
+  --animate-hero-glow: heroGlow 6s ease-in-out infinite;
+  --animate-float-slow: floatSlow 7s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes heroGlow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* ------------------------------------------------------------------
+   BASE
+   ------------------------------------------------------------------ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #060811;
+    color: #eceffa;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Layered neon ambience behind the whole app */
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -12%, rgba(34, 224, 255, 0.12), transparent 60%),
+      radial-gradient(ellipse 70% 55% at 100% 0%, rgba(217, 70, 239, 0.10), transparent 55%),
+      radial-gradient(ellipse 65% 55% at 0% 18%, rgba(124, 58, 237, 0.09), transparent 55%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  ::selection {
+    background: #22e0ff;
+    color: #060811;
+  }
+}
+
+/* ------------------------------------------------------------------
+   SCROLLBARS — thin, neon-tinted
+   ------------------------------------------------------------------ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3048 transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #2a3048, #1b2036);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #06c4ef, #7c3aed);
+  background-clip: padding-box;
+}
+
+/* ------------------------------------------------------------------
+   RANGE SLIDERS — glowing neon thumbs (used across the analyzer)
+   ------------------------------------------------------------------ */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(34,224,255,0.35), rgba(124,58,237,0.35));
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(34,224,255,0.35), rgba(124,58,237,0.35));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  background: #22e0ff;
+  border: 2px solid #060811;
+  box-shadow: 0 0 0 1px rgba(34,224,255,0.4), 0 0 10px rgba(34,224,255,0.7);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 1px rgba(34,224,255,0.6), 0 0 16px rgba(34,224,255,0.95);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #22e0ff;
+  border: 2px solid #060811;
+  box-shadow: 0 0 10px rgba(34,224,255,0.7);
+}
+
+/* ------------------------------------------------------------------
+   REUSABLE PREMIUM UTILITIES
+   ------------------------------------------------------------------ */
+
+/* Frosted glass surface for hero / feature panels */
+.glass {
+  background: linear-gradient(180deg, rgba(18, 22, 40, 0.72), rgba(9, 12, 24, 0.72));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Neon gradient text (brand wordmark, hero labels) */
+.text-neon {
+  background: linear-gradient(90deg, #22e0ff 0%, #7c8bff 45%, #e879f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animated shimmering sheen on top of gradient text/buttons */
+.text-shimmer {
+  background: linear-gradient(90deg, #7bf3ff, #e879f9, #7bf3ff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: var(--animate-shimmer);
+}
+
+/* Soft outer neon ring for the hero stage */
+.neon-ring {
+  box-shadow:
+    0 0 0 1px rgba(34, 224, 255, 0.14),
+    0 0 40px -12px rgba(34, 224, 255, 0.35),
+    0 0 90px -30px rgba(217, 70, 239, 0.3),
+    0 24px 60px -30px rgba(0, 0, 0, 0.9);
+}
+
+/* Thin gradient hairline divider */
+.neon-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,224,255,0.4), rgba(217,70,239,0.35), transparent);
+}
+
+/* Hide scrollbar but keep scrolling (mode switcher on small screens) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Grid-paper backdrop for instrument surfaces */
+.grid-fade {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
