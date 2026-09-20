@@ -1,6 +1,6 @@
 import React from 'react';
-import { VisualizerSettings, VisualizationMode } from '../types';
-import { Sliders, BarChart2, Layers, Waves, Sun, Grid, Eye } from 'lucide-react';
+import { VisualizerSettings } from '../types';
+import { Sliders } from 'lucide-react';
 
 interface VisualizerControlsProps {
   settings: VisualizerSettings;
@@ -11,53 +11,17 @@ export const VisualizerControls: React.FC<VisualizerControlsProps> = ({
   settings,
   updateSettings,
 }) => {
-  const modes: { id: VisualizationMode; label: string; desc: string; icon: React.ReactNode }[] = [
-    { id: 'bars', label: 'Precision Bars', desc: 'Calibrated FFT Spectrum', icon: <BarChart2 className="w-3.5 h-3.5 text-cyan-400" /> },
-    { id: 'curve', label: 'Spectral Spline', desc: 'Continuous SPL Contour', icon: <Waves className="w-3.5 h-3.5 text-emerald-400" /> },
-    { id: 'waterfall', label: '3D Waterfall', desc: '3D Spectrogram Rainfall', icon: <Layers className="w-3.5 h-3.5 text-amber-400" /> },
-    { id: 'spectrogram', label: '2D Heatmap', desc: 'Time-Frequency Heatmap', icon: <Grid className="w-3.5 h-3.5 text-purple-400" /> },
-    { id: 'waveform', label: 'Oscilloscope', desc: 'Time-Domain Voltage', icon: <Eye className="w-3.5 h-3.5 text-rose-400" /> },
-    { id: 'hybrid', label: 'Dual Multi-Scope', desc: 'FFT + Oscilloscope', icon: <Sun className="w-3.5 h-3.5 text-indigo-400" /> },
-  ];
-
   const fftSizes = [128, 256, 512, 1024, 2048, 4096, 8192];
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-xl flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
         <Sliders className="w-4 h-4 text-cyan-400" />
-        <h2 className="text-sm font-semibold text-white">Visualizer Parameters</h2>
-      </div>
-
-      {/* Mode Selector Buttons */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-slate-400 font-medium">Acoustic View Selection</label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {modes.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => updateSettings({ mode: m.id })}
-              id={`btn-mode-${m.id}`}
-              className={`flex items-start gap-2.5 p-2.5 rounded-xl text-xs font-medium border transition-all cursor-pointer text-left ${
-                settings.mode === m.id
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border-cyan-500 text-cyan-300 font-semibold shadow-md ring-1 ring-cyan-500/30'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-              }`}
-            >
-              <div className="p-1 rounded-lg bg-slate-900 border border-slate-800 shrink-0 mt-0.5">
-                {m.icon}
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="font-bold text-slate-200 truncate">{m.label}</span>
-                <span className="text-[10px] text-slate-500 font-normal truncate">{m.desc}</span>
-              </div>
-            </button>
-          ))}
-        </div>
+        <h2 className="text-sm font-semibold text-white">Analyzer Parameters</h2>
       </div>
 
       {/* Sliders Grid: Smoothing, Sensitivity, FFT Size */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Smoothing Slider */}
         <div className="flex flex-col gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
           <div className="flex justify-between items-center text-xs">
