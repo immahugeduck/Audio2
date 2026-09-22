@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { AudioEngineState, AudioMetrics, VisualizerSettings } from '../types';
-import { SAMPLE_TRACKS, generateSampleAudioBuffer, calculateAudioMetrics } from '../utils/audioPresets';
+import { SAMPLE_TRACKS, generateSampleAudioBuffer, calculateAudioMetrics, formatFrequency, frequencyToNote } from '../utils/audioPresets';
+import { PeakFrequencyTracker, sampleNeighborhoodMagnitude } from '../utils/peakFrequencyTracker';
 
 export function useAudioEngine(settings: VisualizerSettings) {
   // Audio state
@@ -47,6 +48,8 @@ export function useAudioEngine(settings: VisualizerSettings) {
     fps: 60,
   });
 
+  const [sampleRate, setSampleRate] = useState(44100);
+
   // Web Audio Node Refs
   const engineStateRef = useRef(engineState);
   engineStateRef.current = engineState;
@@ -78,12 +81,16 @@ export function useAudioEngine(settings: VisualizerSettings) {
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const timeDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
+  // Temporal peak-frequency lock so steady tones don't flash off the readout
+  const peakTrackerRef = useRef(new PeakFrequencyTracker());
+
   // Initialize Audio Context and Audio Graph
   const initAudioGraph = useCallback(() => {
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioContextClass();
       audioCtxRef.current = ctx;
+      setSampleRate(ctx.sampleRate);
 
       // Create Analyser Node
       const analyser = ctx.createAnalyser();
@@ -192,6 +199,9 @@ export function useAudioEngine(settings: VisualizerSettings) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
     }
+
+    // Clear peak lock so a new source/tone starts fresh
+    peakTrackerRef.current.reset();
   }, []);
 
   // Internal function to play buffer from position
@@ -713,13 +723,35 @@ export function useAudioEngine(settings: VisualizerSettings) {
         if (analyserRef.current && frequencyDataRef.current) {
           analyserRef.current.getByteFrequencyData(frequencyDataRef.current);
           const sampleRate = audioCtxRef.current ? audioCtxRef.current.sampleRate : 44100;
-          const calculated = calculateAudioMetrics(frequencyDataRef.current, sampleRate, currentSettings.fftSize);
+          const tracker = peakTrackerRef.current;
+          const preferredHz = tracker.lockedFrequencyHz || undefined;
+          const calculated = calculateAudioMetrics(
+            frequencyDataRef.current,
+            sampleRate,
+            currentSettings.fftSize,
+            preferredHz ? { preferredHz } : undefined
+          );
+
+          const neighborhoodMag = preferredHz
+            ? sampleNeighborhoodMagnitude(frequencyDataRef.current, sampleRate, preferredHz, 3)
+            : 0;
+
+          const tracked = tracker.update({
+            rawHz: calculated.peakFrequencyHz,
+            rawMagnitude: calculated.peakMagnitude,
+            lockedNeighborhoodMagnitude: neighborhoodMag,
+            now,
+          });
+
+          const stableHz = tracked.peakFrequencyHz;
+          const peakFrequencyFormatted = formatFrequency(stableHz);
+          const peakNoteName = frequencyToNote(stableHz).formatted;
 
           setMetrics((prev) => ({
             ...prev,
-            peakFrequencyHz: calculated.peakFrequencyHz,
-            peakFrequencyFormatted: calculated.peakFrequencyFormatted,
-            peakNoteName: calculated.peakNoteName,
+            peakFrequencyHz: stableHz,
+            peakFrequencyFormatted,
+            peakNoteName,
             prominenceDb: calculated.prominenceDb,
             spectralCentroidHz: calculated.spectralCentroidHz,
             rmsDb: calculated.rmsDb,
@@ -770,6 +802,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
   return {
     engineState,
     metrics,
+    sampleRate,
     play,
     pause,
     seek,

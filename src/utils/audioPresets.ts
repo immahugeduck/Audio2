@@ -100,18 +100,79 @@ export function noteToString(freqHz: number): string {
   return `${formatted} • ${formatFrequency(freqHz)}`;
 }
 
+export interface AudioMetricsOptions {
+  /** Prefer a local peak near this Hz when it still has strong energy (lock bias). */
+  preferredHz?: number;
+  /** Absolute byte magnitude required to report an instantaneous peak (default 10). */
+  peakThreshold?: number;
+}
+
+function interpolatePeakHz(
+  frequencyData: Uint8Array,
+  maxIndex: number,
+  hzPerBin: number
+): number {
+  const binCount = frequencyData.length;
+  if (maxIndex <= 0 || maxIndex >= binCount - 1) {
+    return maxIndex * hzPerBin;
+  }
+  const alpha = Math.max(1e-4, frequencyData[maxIndex - 1] / 255);
+  const beta = Math.max(1e-4, frequencyData[maxIndex] / 255);
+  const gamma = Math.max(1e-4, frequencyData[maxIndex + 1] / 255);
+
+  // Log / dB domain parabolic interpolation between adjacent bins
+  const logA = 20 * Math.log10(alpha);
+  const logB = 20 * Math.log10(beta);
+  const logG = 20 * Math.log10(gamma);
+
+  const denom = logA - 2 * logB + logG;
+  let delta = 0;
+  if (Math.abs(denom) > 1e-6) {
+    delta = 0.5 * ((logA - logG) / denom);
+    delta = Math.max(-0.5, Math.min(0.5, delta));
+  }
+  return Math.max(0, (maxIndex + delta) * hzPerBin);
+}
+
+/**
+ * Find strongest bin in [start, end) inclusive of start, exclusive of end.
+ */
+function findMaxInRange(
+  frequencyData: Uint8Array,
+  start: number,
+  end: number
+): { index: number; value: number } {
+  let maxVal = 0;
+  let maxIndex = start;
+  const lo = Math.max(0, start);
+  const hi = Math.min(frequencyData.length, end);
+  for (let i = lo; i < hi; i++) {
+    const val = frequencyData[i];
+    if (val > maxVal) {
+      maxVal = val;
+      maxIndex = i;
+    }
+  }
+  return { index: maxIndex, value: maxVal };
+}
+
 /**
  * Calculates high-accuracy audio telemetry with quadratic/parabolic peak interpolation,
  * energy band integration, and spectral centroid.
+ *
+ * Peak picking skips DC / sub-audible bins, can bias toward a preferred (locked) Hz,
+ * and prefers a strong fundamental over a louder harmonic when both are present.
  */
 export function calculateAudioMetrics(
   frequencyData: Uint8Array,
   sampleRate: number = 44100,
-  fftSize: number = 2048
+  _fftSize: number = 2048,
+  options: AudioMetricsOptions = {}
 ): {
   peakFrequencyHz: number;
   peakFrequencyFormatted: string;
   peakNoteName: string;
+  peakMagnitude: number;
   prominenceDb: number;
   spectralCentroidHz: number;
   rmsDb: number;
@@ -124,9 +185,11 @@ export function calculateAudioMetrics(
 } {
   const binCount = frequencyData.length;
   const hzPerBin = (sampleRate / 2) / binCount;
+  const peakThreshold = options.peakThreshold ?? 10;
 
-  let maxVal = 0;
-  let maxIndex = 0;
+  // Skip DC and sub-audible rumble (< ~20 Hz) for peak picking
+  const minPeakBin = Math.max(1, Math.ceil(20 / hzPerBin));
+
   let sumSq = 0;
   let weightedFreqSum = 0;
   let totalMagnitudeSum = 0;
@@ -141,6 +204,9 @@ export function calculateAudioMetrics(
   let midSum = 0, midCount = 0;
   let trebleSum = 0, trebleCount = 0;
 
+  let globalMaxVal = 0;
+  let globalMaxIndex = minPeakBin;
+
   for (let i = 0; i < binCount; i++) {
     const val = frequencyData[i];
     sumSq += val * val;
@@ -148,9 +214,9 @@ export function calculateAudioMetrics(
     weightedFreqSum += currentHz * val;
     totalMagnitudeSum += val;
 
-    if (val > maxVal) {
-      maxVal = val;
-      maxIndex = i;
+    if (i >= minPeakBin && val > globalMaxVal) {
+      globalMaxVal = val;
+      globalMaxIndex = i;
     }
 
     if (i <= subBassMaxBin) {
@@ -168,6 +234,49 @@ export function calculateAudioMetrics(
     }
   }
 
+  let maxVal = globalMaxVal;
+  let maxIndex = globalMaxIndex;
+
+  // Prefer local peak near locked/preferred frequency when it still has
+  // significant energy — prevents flicker to quieter harmonics/sidebands.
+  if (options.preferredHz && options.preferredHz >= 20) {
+    const prefBin = Math.round(options.preferredHz / hzPerBin);
+    const halfWidth = Math.max(2, Math.ceil(30 / hzPerBin));
+    const local = findMaxInRange(
+      frequencyData,
+      Math.max(minPeakBin, prefBin - halfWidth),
+      Math.min(binCount, prefBin + halfWidth + 1)
+    );
+    // Keep lock bias if neighborhood is at least ~45% of global peak or above threshold
+    if (local.value >= peakThreshold && local.value >= globalMaxVal * 0.45) {
+      maxVal = local.value;
+      maxIndex = local.index;
+    }
+  }
+
+  // Prefer fundamental: if global peak looks like a harmonic of a strong lower peak, use the lower one.
+  if (maxVal > peakThreshold && maxIndex > minPeakBin) {
+    const candidateHz = maxIndex * hzPerBin;
+    for (const divisor of [2, 3, 4]) {
+      const fundHz = candidateHz / divisor;
+      if (fundHz < 40) continue;
+      const fundBin = Math.round(fundHz / hzPerBin);
+      if (fundBin < minPeakBin) continue;
+      const halfWidth = Math.max(1, Math.ceil(20 / hzPerBin));
+      const fund = findMaxInRange(
+        frequencyData,
+        Math.max(minPeakBin, fundBin - halfWidth),
+        Math.min(binCount, fundBin + halfWidth + 1)
+      );
+      // Fundamental must be clearly present (not just noise floor)
+      if (fund.value >= peakThreshold && fund.value >= maxVal * 0.55) {
+        maxVal = fund.value;
+        maxIndex = fund.index;
+        break;
+      }
+    }
+  }
+
   // Calculate RMS dBFS
   const rms = Math.sqrt(sumSq / (binCount || 1)) / 255;
   const rmsDb = rms > 0 ? 20 * Math.log10(rms) : -100;
@@ -177,30 +286,9 @@ export function calculateAudioMetrics(
   const peakDb = peakNorm > 0 ? 20 * Math.log10(peakNorm) : -100;
   const crestFactorDb = Math.max(0, peakDb - rmsDb);
 
-  // High Precision Parabolic (Quadratic) Peak Interpolation:
-  // Evaluates continuous spectral peak between adjacent discrete FFT bins
   let refinedPeakHz = 0;
-  if (maxVal > 10 && maxIndex > 0 && maxIndex < binCount - 1) {
-    const alpha = Math.max(1e-4, frequencyData[maxIndex - 1] / 255);
-    const beta = Math.max(1e-4, frequencyData[maxIndex] / 255);
-    const gamma = Math.max(1e-4, frequencyData[maxIndex + 1] / 255);
-
-    // Convert to log / dB domain for optimal parabolic interpolation
-    const logA = 20 * Math.log10(alpha);
-    const logB = 20 * Math.log10(beta);
-    const logG = 20 * Math.log10(gamma);
-
-    const denom = logA - 2 * logB + logG;
-    let delta = 0;
-    if (Math.abs(denom) > 1e-6) {
-      delta = 0.5 * ((logA - logG) / denom);
-      // Clamp fractional bin offset to [-0.5, 0.5]
-      delta = Math.max(-0.5, Math.min(0.5, delta));
-    }
-
-    refinedPeakHz = Math.max(0, (maxIndex + delta) * hzPerBin);
-  } else if (maxVal > 10) {
-    refinedPeakHz = maxIndex * hzPerBin;
+  if (maxVal > peakThreshold) {
+    refinedPeakHz = interpolatePeakHz(frequencyData, maxIndex, hzPerBin);
   }
 
   // Spectral Centroid (Center of gravity of spectrum in Hz)
@@ -212,6 +300,7 @@ export function calculateAudioMetrics(
     peakFrequencyHz: refinedPeakHz,
     peakFrequencyFormatted: formatFrequency(refinedPeakHz),
     peakNoteName: noteInfo.formatted,
+    peakMagnitude: maxVal,
     prominenceDb: Math.round(peakDb),
     spectralCentroidHz: Math.round(spectralCentroidHz),
     rmsDb: Math.max(-100, Math.min(0, Math.round(rmsDb))),

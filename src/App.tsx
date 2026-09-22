@@ -67,6 +67,7 @@ export default function App() {
   const {
     engineState,
     metrics,
+    sampleRate,
     play,
     pause,
     seek,
@@ -282,6 +283,7 @@ export default function App() {
                   <HarmonicTuner
                     metrics={metrics}
                     getFrequencyData={getFrequencyData}
+                    sampleRate={sampleRate}
                   />
 
                   {/* Speech-to-text transcription of the loaded file/stream */}

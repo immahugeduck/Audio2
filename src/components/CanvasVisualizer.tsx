@@ -422,14 +422,23 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           ctx.fillStyle = peakColor;
           ctx.fillRect(x, y, barWidth, Math.min(2, barHeight));
 
-          // Peak cap hold & decay physics
+          // Peak cap hold & decay physics.
+          // Sustained tones refresh the hold timer while the bar stays near its
+          // peak so a continuous pure tone keeps its cap locked (~1.2s hold).
           if (settings.showPeaks) {
             if (barHeight > peakValuesRef.current[i]) {
               peakValuesRef.current[i] = barHeight;
               peakHoldTimeRef.current[i] = performance.now();
+            } else if (
+              barHeight > 4 &&
+              peakValuesRef.current[i] > 0 &&
+              barHeight >= peakValuesRef.current[i] * 0.55
+            ) {
+              // Signal still present at this bin — keep hold alive
+              peakHoldTimeRef.current[i] = performance.now();
             } else if (!infinitePeakHold) {
               const elapsed = performance.now() - peakHoldTimeRef.current[i];
-              if (elapsed > 400) {
+              if (elapsed > 1200) {
                 peakValuesRef.current[i] = Math.max(0, peakValuesRef.current[i] - 2.5);
               }
             }
@@ -472,13 +481,19 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           const normalized = (rawValue / 255) * settings.sensitivity;
           const h = normalized * (height * 0.75);
 
-          // Update peak values
+          // Update peak values (sustained-tone hold refresh, matching bars mode)
           if (h > curvePeakValuesRef.current[i]) {
             curvePeakValuesRef.current[i] = h;
             curvePeakHoldTimeRef.current[i] = performance.now();
+          } else if (
+            h > 4 &&
+            curvePeakValuesRef.current[i] > 0 &&
+            h >= curvePeakValuesRef.current[i] * 0.55
+          ) {
+            curvePeakHoldTimeRef.current[i] = performance.now();
           } else if (!infinitePeakHold) {
             const elapsed = performance.now() - curvePeakHoldTimeRef.current[i];
-            if (elapsed > 400) {
+            if (elapsed > 1200) {
               curvePeakValuesRef.current[i] = Math.max(0, curvePeakValuesRef.current[i] - 1.5);
             }
           }

@@ -15,11 +15,14 @@ import { AudioMetrics } from '../types';
 interface HarmonicTunerProps {
   metrics: AudioMetrics;
   getFrequencyData: () => Uint8Array | null;
+  /** AudioContext sample rate — used for accurate bin↔Hz mapping. */
+  sampleRate?: number;
 }
 
 export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
   metrics,
   getFrequencyData,
+  sampleRate = 44100,
 }) => {
   const [isActive, setIsActive] = useState<boolean>(true);
 
@@ -53,7 +56,7 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
 
     const harmonicsList: { order: number; expectedHz: number; actualHz: number; amplitude: number; isOdd: boolean }[] = [];
     const binCount = freqData.length;
-    const nyquist = 22050; // standard 44.1kHz sample rate half
+    const nyquist = sampleRate / 2;
     const hzPerBin = nyquist / binCount;
 
     for (let order = 1; order <= 8; order++) {
