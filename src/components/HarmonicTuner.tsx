@@ -104,21 +104,21 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
   const oddPct = totalHarmonicEnergy > 0 ? Math.round((oddEnergy / totalHarmonicEnergy) * 100) : 50;
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30 text-cyan-300">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-accent-500/20 to-emerald-500/20 border border-accent-500/30 text-accent-300">
             <Music className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
               Harmonic Overtones Analyzer & Precision Pitch Tuner
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-500/20 border border-accent-500/40 text-accent-300">
                 A440 TUNER & OVERTONES
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Live chromatic pitch meter with cents calibration and fundamental harmonic overtone series mapping
             </p>
           </div>
@@ -130,19 +130,19 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
           className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
             isActive
               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-              : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
+              : 'bg-ink-800 text-ink-400 border-ink-700 hover:bg-ink-700'
           }`}
         >
-          <Power className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`} />
+          <Power className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400' : 'text-ink-500'}`} />
           {isActive ? 'Engine Active' : 'Engine Paused (Save CPU)'}
         </button>
       </div>
 
       {!isActive ? (
-        <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-6 text-center flex flex-col items-center justify-center gap-2">
-          <Power className="w-8 h-8 text-slate-600" />
-          <h4 className="text-xs font-bold text-slate-400">Harmonizer Analysis Engine Paused</h4>
-          <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+        <div className="bg-ink-950/80 rounded-xl border border-ink-800 p-6 text-center flex flex-col items-center justify-center gap-2">
+          <Power className="w-8 h-8 text-ink-600" />
+          <h4 className="text-xs font-bold text-ink-400">Harmonizer Analysis Engine Paused</h4>
+          <p className="text-xs text-ink-500 max-w-sm leading-relaxed">
             Harmonic overtone detection and pitch calculation are paused to conserve compute power. Click 'Engine Paused' above to reactivate.
           </p>
         </div>
@@ -151,12 +151,12 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
           {/* Main Pitch Tuner Display */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Left: Pitch Target Card */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Detected Note Pitch</span>
+            <div className="bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col items-center justify-center text-center">
+              <span className="text-[10px] font-bold text-ink-500 uppercase tracking-wider mb-1">Detected Note Pitch</span>
               <div className={`text-4xl font-extrabold font-mono transition-all ${tuning.isTuned ? 'text-emerald-400 scale-105' : 'text-white'}`}>
                 {tuning.targetNote}
               </div>
-              <div className="text-xs text-slate-400 font-mono mt-1">
+              <div className="text-xs text-ink-400 font-mono mt-1">
                 {peakHz > 0 ? `${Math.round(peakHz)} Hz` : '---'}
               </div>
               {tuning.isTuned && (
@@ -167,21 +167,21 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
             </div>
 
             {/* Center: Cents Gauge Needle Meter */}
-            <div className="md:col-span-2 bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between gap-3">
+            <div className="md:col-span-2 bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col justify-between gap-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-slate-400 uppercase text-[10px] tracking-wider">Chromatic Calibration (Cents Offset)</span>
-                <span className={`font-mono font-bold ${tuning.centsOffset === 0 ? 'text-emerald-400' : tuning.centsOffset > 0 ? 'text-amber-400' : 'text-cyan-400'}`}>
+                <span className="font-bold text-ink-400 uppercase text-[10px] tracking-wider">Chromatic Calibration (Cents Offset)</span>
+                <span className={`font-mono font-bold ${tuning.centsOffset === 0 ? 'text-emerald-400' : tuning.centsOffset > 0 ? 'text-amber-400' : 'text-accent-400'}`}>
                   {tuning.centsOffset > 0 ? `+${tuning.centsOffset}` : tuning.centsOffset} cents
                 </span>
               </div>
 
               {/* Needle Graphic */}
-              <div className="relative w-full h-10 bg-slate-900 rounded-xl border border-slate-800 flex items-center px-4 overflow-hidden">
+              <div className="relative w-full h-10 bg-ink-900 rounded-xl border border-ink-800 flex items-center px-4 overflow-hidden">
                 {/* Center Zero Line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-emerald-500 z-10" />
 
                 {/* Flat (-50) to Sharp (+50) markers */}
-                <div className="w-full flex justify-between text-[9px] font-mono text-slate-600 z-0">
+                <div className="w-full flex justify-between text-[9px] font-mono text-ink-600 z-0">
                   <span>-50 Flat</span>
                   <span>-25</span>
                   <span className="text-emerald-400 font-bold">0</span>
@@ -191,16 +191,16 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
 
                 {/* Dynamic Needle */}
                 <div 
-                  className="absolute top-1 bottom-1 w-2 rounded-full bg-gradient-to-b from-cyan-400 to-emerald-400 shadow-lg shadow-cyan-500/50 transition-all duration-150 z-20"
+                  className="absolute top-1 bottom-1 w-2 rounded-full bg-gradient-to-b from-accent-400 to-emerald-400 shadow-lg shadow-accent-500/50 transition-all duration-150 z-20"
                   style={{
                     left: `calc(${Math.min(95, Math.max(5, 50 + tuning.centsOffset))}% - 4px)`
                   }}
                 />
               </div>
 
-              <div className="flex justify-between text-[10px] text-slate-500">
-                <span>Tuning Standard: <strong className="text-slate-300">A4 = 440 Hz</strong></span>
-                <span>Target: <strong className="text-slate-300">{Math.round(tuning.targetHz)} Hz</strong></span>
+              <div className="flex justify-between text-[10px] text-ink-500">
+                <span>Tuning Standard: <strong className="text-ink-300">A4 = 440 Hz</strong></span>
+                <span>Target: <strong className="text-ink-300">{Math.round(tuning.targetHz)} Hz</strong></span>
               </div>
             </div>
           </div>
@@ -208,9 +208,9 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
           {/* Harmonic Overtones Series Grid */}
           {harmonics.length > 0 ? (
             <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
-                <h4 className="font-bold text-slate-200 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-cyan-400" />
+              <div className="flex justify-between items-center text-xs border-b border-ink-800 pb-2">
+                <h4 className="font-bold text-ink-200 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-accent-400" />
                   Fundamental & Overtone Harmonic Series (1x to 8x)
                 </h4>
                 <div className="flex gap-3 text-[10px] font-semibold">
@@ -223,41 +223,41 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
                 {harmonics.map((h) => (
                   <div 
                     key={h.order} 
-                    className={`bg-slate-950 p-2.5 rounded-xl border flex flex-col justify-between gap-2 transition-all ${
+                    className={`bg-ink-950 p-2.5 rounded-xl border flex flex-col justify-between gap-2 transition-all ${
                       h.order === 1 
-                        ? 'border-cyan-500/50 bg-cyan-500/5' 
+                        ? 'border-accent-500/50 bg-accent-500/5' 
                         : h.isOdd 
                         ? 'border-amber-500/30' 
                         : 'border-emerald-500/30'
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <span className={`text-[10px] font-bold ${h.order === 1 ? 'text-cyan-300' : h.isOdd ? 'text-amber-300' : 'text-emerald-300'}`}>
+                      <span className={`text-[10px] font-bold ${h.order === 1 ? 'text-accent-300' : h.isOdd ? 'text-amber-300' : 'text-emerald-300'}`}>
                         {h.order === 1 ? '1x Fund.' : `${h.order}x Harmonic`}
                       </span>
                     </div>
 
                     <div className="text-xs font-mono font-bold text-white">
-                      {h.expectedHz} <span className="text-[9px] font-normal text-slate-500">Hz</span>
+                      {h.expectedHz} <span className="text-[9px] font-normal text-ink-500">Hz</span>
                     </div>
 
                     {/* Energy Bar */}
-                    <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-ink-900 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all ${
-                          h.order === 1 ? 'bg-cyan-400' : h.isOdd ? 'bg-amber-400' : 'bg-emerald-400'
+                          h.order === 1 ? 'bg-accent-400' : h.isOdd ? 'bg-amber-400' : 'bg-emerald-400'
                         }`}
                         style={{ width: `${h.amplitude}%` }}
                       />
                     </div>
 
-                    <span className="text-[9px] font-mono text-slate-500 text-right">{h.amplitude}% energy</span>
+                    <span className="text-[9px] font-mono text-ink-500 text-right">{h.amplitude}% energy</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="bg-slate-950/60 rounded-xl border border-slate-850 p-4 text-center text-xs text-slate-500">
+            <div className="bg-ink-950/60 rounded-xl border border-ink-850 p-4 text-center text-xs text-ink-500">
               Play a sustained audio note or synth tone to analyze its harmonic overtones.
             </div>
           )}

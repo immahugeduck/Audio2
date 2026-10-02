@@ -206,21 +206,21 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
   }, [autoMode, engineState.sourceType, captureAndClassify]);
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 text-cyan-300">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-accent-500/20 to-plum-500/20 border border-accent-500/30 text-accent-300">
             <Cpu className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
               AI Live Noise Detector
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-500/20 border border-accent-500/40 text-accent-300">
                 Gemini AI
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Live microphone audio classification & sound guessing
             </p>
           </div>
@@ -237,31 +237,31 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
           id="btn-toggle-auto-noise-ai"
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer ${
             autoMode
-              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-md shadow-cyan-500/10'
-              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+              ? 'bg-accent-500/20 border-accent-500 text-accent-300 shadow-md shadow-accent-500/10'
+              : 'bg-ink-950 border-ink-800 text-ink-400 hover:text-white hover:border-ink-700'
           }`}
         >
-          <Radio className={`w-3.5 h-3.5 ${autoMode ? 'animate-pulse text-cyan-400' : ''}`} />
+          <Radio className={`w-3.5 h-3.5 ${autoMode ? 'animate-pulse text-accent-400' : ''}`} />
           {autoMode ? 'Auto-Guessing: ON' : 'Auto-Guessing: OFF'}
         </button>
       </div>
 
       {/* Mic Inactive State Prompt */}
       {engineState.sourceType !== 'mic' && (
-        <div className="bg-slate-950/80 border border-slate-800/70 rounded-xl p-4 text-center flex flex-col items-center gap-3">
-          <div className="p-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+        <div className="bg-ink-950/80 border border-ink-800/70 rounded-xl p-4 text-center flex flex-col items-center gap-3">
+          <div className="p-3 rounded-full bg-accent-500/10 border border-accent-500/20 text-accent-400">
             <Mic className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-slate-200">Microphone Input Needed</h4>
-            <p className="text-xs text-slate-400 max-w-md mt-0.5">
+            <h4 className="text-sm font-medium text-ink-200">Microphone Input Needed</h4>
+            <p className="text-xs text-ink-400 max-w-md mt-0.5">
               Switch to live microphone input so the Gemini AI engine can listen to and identify noises in your room (clapping, typing, whistling, speech, background fan, etc.).
             </p>
           </div>
           <button
             onClick={enableMicrophone}
             id="btn-enable-mic-for-ai"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20 flex items-center gap-2 cursor-pointer transition-all"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-accent-500 to-sage-600 hover:from-accent-400 hover:to-sage-500 text-white shadow-lg shadow-accent-500/20 flex items-center gap-2 cursor-pointer transition-all"
           >
             <Mic className="w-4 h-4" />
             Enable Microphone Input
@@ -281,8 +281,8 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
                 isRecording
                   ? 'bg-rose-500/20 border border-rose-500 text-rose-300 shadow-rose-500/10 animate-pulse'
                   : isAnalyzing
-                  ? 'bg-purple-500/20 border border-purple-500 text-purple-300 shadow-purple-500/10'
-                  : 'bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-cyan-500/20'
+                  ? 'bg-plum-500/20 border border-plum-500 text-plum-300 shadow-plum-500/10'
+                  : 'bg-gradient-to-r from-accent-500 via-sage-600 to-plum-600 hover:from-accent-400 hover:to-plum-500 text-white shadow-accent-500/20'
               }`}
             >
               {isRecording ? (
@@ -292,12 +292,12 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
                 </>
               ) : isAnalyzing ? (
                 <>
-                  <Sparkles className="w-4 h-4 animate-spin text-purple-300" />
+                  <Sparkles className="w-4 h-4 animate-spin text-plum-300" />
                   Analyzing Acoustic Fingerprint...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-cyan-200" />
+                  <Sparkles className="w-4 h-4 text-accent-200" />
                   Guess Live Noise Now
                 </>
               )}
@@ -310,7 +310,7 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
                 setErrorMsg(null);
               }}
               id="btn-clear-ai-history"
-              className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 cursor-pointer transition-all"
+              className="p-2.5 rounded-xl bg-ink-950 border border-ink-800 text-ink-400 hover:text-white hover:border-ink-700 cursor-pointer transition-all"
               title="Clear Detection Results"
             >
               <RefreshCw className="w-4 h-4" />
@@ -319,9 +319,9 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
           {/* Recording Progress Bar */}
           {isRecording && (
-            <div className="w-full bg-slate-950 rounded-full h-1.5 border border-slate-800 overflow-hidden">
+            <div className="w-full bg-ink-950 rounded-full h-1.5 border border-ink-800 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-cyan-500 to-rose-500 h-full transition-all duration-75"
+                className="bg-gradient-to-r from-accent-500 to-rose-500 h-full transition-all duration-75"
                 style={{ width: `${recordProgress}%` }}
               />
             </div>
@@ -340,16 +340,16 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
           {/* Active Guessed Noise Display Card */}
           {latestResult && (
-            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-cyan-500/30 rounded-xl p-4 shadow-inner flex flex-col gap-3">
-              <div className="flex items-start justify-between gap-3 border-b border-slate-800/80 pb-3">
+            <div className="bg-gradient-to-br from-ink-950 via-ink-900 to-ink-950 border border-accent-500/30 rounded-xl p-4 shadow-inner flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3 border-b border-ink-800/80 pb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl p-2 bg-slate-900 border border-slate-800 rounded-xl shadow-sm">
+                  <span className="text-3xl p-2 bg-ink-900 border border-ink-800 rounded-xl shadow-sm">
                     {getSoundEmoji(latestResult.primarySound, latestResult.category)}
                   </span>
                   <div>
-                    <div className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
+                    <div className="text-xs font-medium text-ink-400 flex items-center gap-1.5">
                       Primary AI Guess
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-semibold">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-ink-800 border border-ink-700 text-ink-300 font-semibold">
                         {latestResult.category}
                       </span>
                     </div>
@@ -361,12 +361,12 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
                 {/* Confidence Badge */}
                 <div className="text-right shrink-0">
-                  <div className="text-xs font-semibold text-cyan-400">
+                  <div className="text-xs font-semibold text-accent-400">
                     {latestResult.confidence}% Match
                   </div>
-                  <div className="w-20 bg-slate-950 rounded-full h-2 border border-slate-800 mt-1 overflow-hidden">
+                  <div className="w-20 bg-ink-950 rounded-full h-2 border border-ink-800 mt-1 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-cyan-500 to-purple-500 h-full rounded-full"
+                      className="bg-gradient-to-r from-accent-500 to-plum-500 h-full rounded-full"
                       style={{ width: `${Math.min(100, latestResult.confidence)}%` }}
                     />
                   </div>
@@ -374,15 +374,15 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
               </div>
 
               {/* Description & Characteristics */}
-              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+              <p className="text-xs text-ink-300 leading-relaxed font-normal">
                 {latestResult.description}
               </p>
 
               {latestResult.acousticCharacteristics && (
-                <div className="text-[11px] text-slate-400 bg-slate-900/80 border border-slate-800/80 rounded-lg p-2.5 flex items-start gap-2">
-                  <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-ink-400 bg-ink-900/80 border border-ink-800/80 rounded-lg p-2.5 flex items-start gap-2">
+                  <Zap className="w-3.5 h-3.5 text-accent-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-slate-300 font-semibold">Acoustic Signature: </span>
+                    <span className="text-ink-300 font-semibold">Acoustic Signature: </span>
                     {latestResult.acousticCharacteristics}
                   </div>
                 </div>
@@ -390,51 +390,51 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
               {/* Psychoacoustic Metric Ratings */}
               {latestResult.psychoacoustics && (
-                <div className="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-300 border-b border-slate-800 pb-1.5">
+                <div className="bg-ink-950/90 border border-ink-800/90 rounded-xl p-3 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-ink-300 border-b border-ink-800 pb-1.5">
                     <span>Psychoacoustic Profile</span>
-                    <span className="text-cyan-400 font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                    <span className="text-accent-400 font-mono text-[10px] px-2 py-0.5 rounded bg-accent-500/10 border border-accent-500/20">
                       {latestResult.psychoacoustics.soundPurity} ({latestResult.psychoacoustics.perceivedLoudnessLufs} LUFS)
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
                     <div>
-                      <div className="flex justify-between text-slate-400 mb-0.5">
+                      <div className="flex justify-between text-ink-400 mb-0.5">
                         <span>Sharpness</span>
-                        <span className="text-slate-200 font-mono">{latestResult.psychoacoustics.sharpnessScore}%</span>
+                        <span className="text-ink-200 font-mono">{latestResult.psychoacoustics.sharpnessScore}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-cyan-400 h-full" style={{ width: `${latestResult.psychoacoustics.sharpnessScore}%` }} />
+                      <div className="w-full bg-ink-900 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-accent-400 h-full" style={{ width: `${latestResult.psychoacoustics.sharpnessScore}%` }} />
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-slate-400 mb-0.5">
+                      <div className="flex justify-between text-ink-400 mb-0.5">
                         <span>Brightness</span>
-                        <span className="text-slate-200 font-mono">{latestResult.psychoacoustics.brightnessScore}%</span>
+                        <span className="text-ink-200 font-mono">{latestResult.psychoacoustics.brightnessScore}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-ink-900 h-1.5 rounded-full overflow-hidden">
                         <div className="bg-amber-400 h-full" style={{ width: `${latestResult.psychoacoustics.brightnessScore}%` }} />
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-slate-400 mb-0.5">
+                      <div className="flex justify-between text-ink-400 mb-0.5">
                         <span>Warmth</span>
-                        <span className="text-slate-200 font-mono">{latestResult.psychoacoustics.warmthScore}%</span>
+                        <span className="text-ink-200 font-mono">{latestResult.psychoacoustics.warmthScore}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-purple-400 h-full" style={{ width: `${latestResult.psychoacoustics.warmthScore}%` }} />
+                      <div className="w-full bg-ink-900 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-plum-400 h-full" style={{ width: `${latestResult.psychoacoustics.warmthScore}%` }} />
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-slate-400 mb-0.5">
+                      <div className="flex justify-between text-ink-400 mb-0.5">
                         <span>Harshness</span>
-                        <span className="text-slate-200 font-mono">{latestResult.psychoacoustics.harshnessScore}%</span>
+                        <span className="text-ink-200 font-mono">{latestResult.psychoacoustics.harshnessScore}%</span>
                       </div>
-                      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-ink-900 h-1.5 rounded-full overflow-hidden">
                         <div className="bg-rose-400 h-full" style={{ width: `${latestResult.psychoacoustics.harshnessScore}%` }} />
                       </div>
                     </div>
@@ -444,28 +444,28 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
               {/* Recommended Fixes / Acoustic Treatment */}
               {latestResult.recommendedFixes && (
-                <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-[11px] flex flex-col gap-1.5">
-                  <div className="font-semibold text-cyan-300 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="bg-accent-500/5 border border-accent-500/20 rounded-xl p-3 text-[11px] flex flex-col gap-1.5">
+                  <div className="font-semibold text-accent-300 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-accent-400" />
                     Recommended Acoustic Fixes:
                   </div>
-                  <ul className="list-disc list-inside space-y-1 text-slate-300 pl-1 text-[11px]">
-                    <li><strong className="text-slate-200">EQ Filtering:</strong> {latestResult.recommendedFixes.eqAction}</li>
-                    <li><strong className="text-slate-200">Room Treatment:</strong> {latestResult.recommendedFixes.roomTreatment}</li>
-                    <li><strong className="text-slate-200">Hardware / Gate:</strong> {latestResult.recommendedFixes.hardwareFix}</li>
+                  <ul className="list-disc list-inside space-y-1 text-ink-300 pl-1 text-[11px]">
+                    <li><strong className="text-ink-200">EQ Filtering:</strong> {latestResult.recommendedFixes.eqAction}</li>
+                    <li><strong className="text-ink-200">Room Treatment:</strong> {latestResult.recommendedFixes.roomTreatment}</li>
+                    <li><strong className="text-ink-200">Hardware / Gate:</strong> {latestResult.recommendedFixes.hardwareFix}</li>
                   </ul>
                 </div>
               )}
 
               {/* Secondary Candidate Guesses */}
               {latestResult.top2OtherNoises && latestResult.top2OtherNoises.length > 0 && (
-                <div className="flex items-center gap-2 text-xs text-slate-400 pt-1">
-                  <span className="font-medium text-slate-500">Other possibilities:</span>
+                <div className="flex items-center gap-2 text-xs text-ink-400 pt-1">
+                  <span className="font-medium text-ink-500">Other possibilities:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {latestResult.top2OtherNoises.map((noise, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px]"
+                        className="px-2 py-0.5 rounded-md bg-ink-900 border border-ink-800 text-ink-300 text-[11px]"
                       >
                         {noise}
                       </span>
@@ -477,10 +477,10 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
           )}
 
           {/* Quick Sound Testing Prompts */}
-          <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-3">
-            <div className="text-[11px] font-medium text-slate-400 mb-2 flex items-center justify-between">
+          <div className="bg-ink-950/60 border border-ink-800/60 rounded-xl p-3">
+            <div className="text-[11px] font-medium text-ink-400 mb-2 flex items-center justify-between">
               <span>Try making these noises into your mic:</span>
-              <span className="text-cyan-400 font-semibold text-[10px]">Live Audio AI</span>
+              <span className="text-accent-400 font-semibold text-[10px]">Live Audio AI</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {[
@@ -499,7 +499,7 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
                     }
                   }}
                   id={`btn-test-noise-${idx}`}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50 transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-ink-900 border border-ink-800 text-ink-300 hover:text-accent-300 hover:border-accent-500/50 transition-all cursor-pointer"
                   title={`Test tip: ${item.hint}`}
                 >
                   {item.label}
@@ -510,33 +510,33 @@ export const AiNoiseDetector: React.FC<AiNoiseDetectorProps> = ({
 
           {/* Sound History Log */}
           {history.length > 1 && (
-            <div className="border-t border-slate-800/80 pt-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-2">
-                <History className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="border-t border-ink-800/80 pt-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-400 mb-2">
+                <History className="w-3.5 h-3.5 text-accent-400" />
                 Recent Guessed Noises
               </div>
               <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
                 {history.slice(1).map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 rounded-lg bg-slate-950/80 border border-slate-800/60 text-xs"
+                    className="flex items-center justify-between p-2 rounded-lg bg-ink-950/80 border border-ink-800/60 text-xs"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-base">
                         {getSoundEmoji(item.primarySound, item.category)}
                       </span>
-                      <span className="font-semibold text-slate-200 capitalize">
+                      <span className="font-semibold text-ink-200 capitalize">
                         {item.primarySound}
                       </span>
-                      <span className="text-[10px] text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-ink-500 bg-ink-900 px-1.5 py-0.5 rounded">
                         {item.category}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-medium text-cyan-400">
+                      <span className="text-[11px] font-medium text-accent-400">
                         {item.confidence}%
                       </span>
-                      <span className="text-[10px] text-slate-500">{item.timestamp}</span>
+                      <span className="text-[10px] text-ink-500">{item.timestamp}</span>
                     </div>
                   </div>
                 ))}

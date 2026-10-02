@@ -164,21 +164,21 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
   });
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-purple-300">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-plum-500/20 to-coral-500/20 border border-plum-500/30 text-plum-300">
             <Bookmark className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
               Audio Bookmark & Event Anomaly Log
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 border border-purple-500/40 text-purple-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-plum-500/20 border border-plum-500/40 text-plum-300">
                 {events.length} LOGGED EVENTS
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Auto-flags transient spikes and clipping anomalies while letting you tag custom timestamped bookmarks
             </p>
           </div>
@@ -188,7 +188,7 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
           <button
             onClick={exportCsv}
             disabled={events.length === 0}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 border border-ink-700 text-ink-200 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -205,9 +205,9 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
       </div>
 
       {/* Manual Tag Input Bar */}
-      <div className="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-        <div className="flex items-center gap-1.5 px-2 text-slate-400 text-xs font-mono shrink-0">
-          <Clock className="w-3.5 h-3.5 text-purple-400" />
+      <div className="flex items-center gap-2 bg-ink-950 p-2.5 rounded-xl border border-ink-800">
+        <div className="flex items-center gap-1.5 px-2 text-ink-400 text-xs font-mono shrink-0">
+          <Clock className="w-3.5 h-3.5 text-plum-400" />
           {formatTimestamp(currentTime)}
         </div>
         <input
@@ -216,12 +216,12 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
           onChange={(e) => setManualNoteText(e.target.value)}
           placeholder="Type custom note (e.g. 'Door slam', 'Guitar solo', 'Breath pop')..."
           onKeyDown={(e) => e.key === 'Enter' && addManualBookmark()}
-          className="w-full bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500"
+          className="w-full bg-ink-900 border border-ink-800 text-ink-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-plum-500"
         />
         <button
           onClick={addManualBookmark}
           id="btn-add-audio-bookmark"
-          className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 transition-all cursor-pointer"
+          className="px-4 py-1.5 rounded-lg bg-plum-600 hover:bg-plum-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 transition-all cursor-pointer"
         >
           <PlusCircle className="w-3.5 h-3.5" />
           Add Bookmark
@@ -229,12 +229,12 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+      <div className="flex items-center justify-between text-xs border-b border-ink-800 pb-2">
         <div className="flex gap-2">
           <button
             onClick={() => setFilterType('all')}
             className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-              filterType === 'all' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40' : 'text-slate-400 hover:text-slate-200'
+              filterType === 'all' ? 'bg-plum-500/20 text-plum-300 border border-plum-500/40' : 'text-ink-400 hover:text-ink-200'
             }`}
           >
             All Events ({events.length})
@@ -242,7 +242,7 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
           <button
             onClick={() => setFilterType('anomaly')}
             className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-              filterType === 'anomaly' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-slate-400 hover:text-slate-200'
+              filterType === 'anomaly' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-ink-400 hover:text-ink-200'
             }`}
           >
             Anomalies ({events.filter(e => e.type !== 'manual').length})
@@ -250,7 +250,7 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
           <button
             onClick={() => setFilterType('manual')}
             className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-              filterType === 'manual' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
+              filterType === 'manual' ? 'bg-accent-500/20 text-accent-300 border border-accent-500/40' : 'text-ink-400 hover:text-ink-200'
             }`}
           >
             Bookmarks ({events.filter(e => e.type === 'manual').length})
@@ -269,7 +269,7 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
                   ? 'bg-rose-950/30 border-rose-500/40'
                   : ev.type === 'anomaly'
                   ? 'bg-amber-950/20 border-amber-500/30'
-                  : 'bg-slate-950 border-slate-800'
+                  : 'bg-ink-950 border-ink-800'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -278,19 +278,19 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
                     ? 'bg-rose-500/20 text-rose-400'
                     : ev.type === 'anomaly'
                     ? 'bg-amber-500/20 text-amber-400'
-                    : 'bg-purple-500/20 text-purple-400'
+                    : 'bg-plum-500/20 text-plum-400'
                 }`}>
                   {ev.type === 'manual' ? <Tag className="w-4 h-4" /> : <AlertOctagon className="w-4 h-4" />}
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-white bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                    <span className="font-mono text-xs font-bold text-white bg-ink-900 px-2 py-0.5 rounded border border-ink-800">
                       {ev.formattedTime}
                     </span>
-                    <h4 className="text-xs font-bold text-slate-200">{ev.title}</h4>
+                    <h4 className="text-xs font-bold text-ink-200">{ev.title}</h4>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">{ev.details}</p>
+                  <p className="text-[11px] text-ink-400 mt-1">{ev.details}</p>
                 </div>
               </div>
 
@@ -298,14 +298,14 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
                 <button
                   onClick={() => copyEventToClipboard(ev)}
                   title="Copy Event Info"
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg bg-ink-800 hover:bg-ink-700 text-ink-300 transition-all cursor-pointer"
                 >
                   {copiedId === ev.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
                 <button
                   onClick={() => deleteEvent(ev.id)}
                   title="Delete Event"
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg bg-ink-800 hover:bg-rose-500/20 text-ink-400 hover:text-rose-300 transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -314,7 +314,7 @@ export const EventAnomalyLog: React.FC<EventAnomalyLogProps> = ({
           ))}
         </div>
       ) : (
-        <div className="bg-slate-950/60 rounded-xl border border-slate-850 p-6 text-center text-xs text-slate-500">
+        <div className="bg-ink-950/60 rounded-xl border border-ink-850 p-6 text-center text-xs text-ink-500">
           No events logged yet. Play audio to automatically detect transient spikes, or click 'Add Bookmark' above.
         </div>
       )}

@@ -42,17 +42,17 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-xl flex flex-col gap-4">
+    <div className="bg-ink-900/90 rounded-2xl border border-ink-800 p-4 sm:p-5 shadow-xl flex flex-col gap-4">
       {/* Top Source Switcher Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
-        <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-ink-800">
+        <div className="flex items-center gap-1.5 bg-ink-950 p-1 rounded-xl border border-ink-800">
           <button
             onClick={() => loadSampleTrack(engineState.activeSampleId)}
             id="tab-source-sample"
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
               engineState.sourceType === 'sample'
-                ? 'bg-cyan-500 text-slate-950 font-semibold shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-accent-500 text-ink-950 font-semibold shadow-md'
+                : 'text-ink-400 hover:text-white hover:bg-ink-800'
             }`}
           >
             <Music className="w-3.5 h-3.5" />
@@ -63,8 +63,8 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             id="tab-source-file"
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
               engineState.sourceType === 'file'
-                ? 'bg-cyan-500 text-slate-950 font-semibold shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-accent-500 text-ink-950 font-semibold shadow-md'
+                : 'text-ink-400 hover:text-white hover:bg-ink-800'
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
@@ -83,7 +83,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
               engineState.sourceType === 'mic'
                 ? 'bg-rose-500 text-white font-semibold shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-ink-400 hover:text-white hover:bg-ink-800'
             }`}
           >
             <Mic className="w-3.5 h-3.5" />
@@ -95,7 +95,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
         {engineState.sourceType === 'mic' && (
           <div className="flex items-center gap-2 flex-wrap">
             {/* Quick Switcher Buttons */}
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-1 bg-ink-950 p-1 rounded-xl border border-ink-800">
               {/* Phone Mic Button */}
               <button
                 onClick={() => {
@@ -106,7 +106,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   !engineState.audioInputDevices.find((d) => d.deviceId === engineState.selectedDeviceId)?.isBluetooth
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-ink-400 hover:text-ink-200'
                 }`}
                 title="Phone Mic (Built-in) is recommended for superior sensitivity & acoustic measurement accuracy"
               >
@@ -127,10 +127,10 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                 id="btn-select-bluetooth-mic"
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   engineState.audioInputDevices.find((d) => d.deviceId === engineState.selectedDeviceId)?.isBluetooth
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
+                    ? 'bg-accent-500/20 text-accent-300 border border-accent-500/40 font-bold'
                     : engineState.isBluetoothConnected
-                    ? 'text-cyan-400 hover:bg-slate-800'
-                    : 'text-slate-500 hover:text-slate-400'
+                    ? 'text-accent-400 hover:bg-ink-800'
+                    : 'text-ink-500 hover:text-ink-400'
                 }`}
                 title={
                   engineState.isBluetoothConnected
@@ -138,11 +138,11 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                     : 'Connect Bluetooth headphones or headset to switch input'
                 }
               >
-                <Headphones className={`w-3.5 h-3.5 ${engineState.isBluetoothConnected ? 'text-cyan-400' : 'text-slate-500'}`} />
+                <Headphones className={`w-3.5 h-3.5 ${engineState.isBluetoothConnected ? 'text-accent-400' : 'text-ink-500'}`} />
                 <span>
                   Bluetooth
                   {engineState.isBluetoothConnected && (
-                    <span className="ml-1 text-[9px] bg-cyan-500/30 text-cyan-300 px-1 rounded-full uppercase font-bold">Connected</span>
+                    <span className="ml-1 text-[9px] bg-accent-500/30 text-accent-300 px-1 rounded-full uppercase font-bold">Connected</span>
                   )}
                 </span>
               </button>
@@ -154,7 +154,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                 value={engineState.selectedDeviceId || ''}
                 onChange={(e) => enableMicrophone(e.target.value)}
                 id="select-audio-input-device"
-                className="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer max-w-[180px] truncate"
+                className="bg-ink-950 border border-ink-800 text-xs text-ink-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer max-w-[180px] truncate"
               >
                 {engineState.audioInputDevices.map((dev) => (
                   <option key={dev.deviceId} value={dev.deviceId}>
@@ -169,12 +169,12 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
         {/* Sample Selection Dropdown */}
         {engineState.sourceType === 'sample' && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Track:</span>
+            <span className="text-xs text-ink-400">Track:</span>
             <select
               value={engineState.activeSampleId}
               onChange={(e) => loadSampleTrack(e.target.value)}
               id="select-sample-track"
-              className="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+              className="bg-ink-950 border border-ink-800 text-xs text-ink-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-accent-500 cursor-pointer"
             >
               {SAMPLE_TRACKS.map((track) => (
                 <option key={track.id} value={track.id}>
@@ -187,7 +187,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
 
         {/* Audio File Name Indicator */}
         {engineState.sourceType === 'file' && (
-          <div className="text-xs text-cyan-400 font-medium truncate max-w-[200px]">
+          <div className="text-xs text-accent-400 font-medium truncate max-w-[200px]">
             📁 {engineState.fileName || 'Uploaded Audio'}
           </div>
         )}
@@ -233,8 +233,8 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
           id="btn-play-pause"
           className={`p-3.5 rounded-2xl flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95 ${
             engineState.isPlaying
-              ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
-              : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950'
+              ? 'bg-amber-500 hover:bg-amber-400 text-ink-950'
+              : 'bg-accent-500 hover:bg-accent-400 text-ink-950'
           }`}
         >
           {engineState.isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
@@ -242,7 +242,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
 
         {/* Timeline Seekbar */}
         <div className="flex-1 w-full flex items-center gap-3">
-          <span className="text-xs font-mono text-slate-400 min-w-[42px]">
+          <span className="text-xs font-mono text-ink-400 min-w-[42px]">
             {formatTime(engineState.currentTime)}
           </span>
 
@@ -255,10 +255,10 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             disabled={engineState.sourceType === 'mic'}
             onChange={(e) => seek(parseFloat(e.target.value))}
             id="input-seek-bar"
-            className="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-cyan-400 disabled:opacity-40"
+            className="w-full h-2 bg-ink-950 rounded-lg appearance-none cursor-pointer accent-accent-400 disabled:opacity-40"
           />
 
-          <span className="text-xs font-mono text-slate-400 min-w-[42px]">
+          <span className="text-xs font-mono text-ink-400 min-w-[42px]">
             {engineState.sourceType === 'mic' ? 'LIVE' : formatTime(engineState.duration)}
           </span>
         </div>
@@ -268,12 +268,12 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
           <button
             onClick={toggleMute}
             id="btn-toggle-mute"
-            className="p-2 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 text-ink-400 hover:text-white transition-colors cursor-pointer"
           >
             {engineState.isMuted || engineState.volume === 0 ? (
               <VolumeX className="w-4 h-4 text-rose-400" />
             ) : (
-              <Volume2 className="w-4 h-4 text-cyan-400" />
+              <Volume2 className="w-4 h-4 text-accent-400" />
             )}
           </button>
           <input
@@ -284,7 +284,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             value={engineState.isMuted ? 0 : engineState.volume}
             onChange={(e) => setVolume(parseFloat(e.target.value))}
             id="input-volume-slider"
-            className="w-20 h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-20 h-1.5 bg-ink-950 rounded-lg appearance-none cursor-pointer accent-accent-400"
           />
         </div>
       </div>

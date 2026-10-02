@@ -1,66 +1,95 @@
-/* Audio2une — premium neon-spectrum design system.
-   Fonts must be imported before the Tailwind import (CSS @import ordering). */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* Auralis — design system.
+   A warm, editorial "studio at night" look: charcoal ink surfaces, ivory text,
+   an ember-gold signature accent (user switchable in Settings → Color).
+   Fonts load before Tailwind (CSS @import ordering); every stack has a safe
+   system fallback so the app stays fully usable offline. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
    THEME TOKENS
-   The whole app is re-skinned from here. Every panel uses Tailwind
-   `slate-*` / `cyan-*` utilities, so overriding those ramps below
-   restyles the entire UI at once into the neon-dark look.
+   Surfaces → `ink-*`, signature colour → `accent-*` (driven by CSS
+   variables so the Settings page can re-theme the app live), supporting
+   hues → `coral-*`, `plum-*`, `sage-*`.
    ------------------------------------------------------------------ */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Instrument Serif', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Neon-dark surface ramp (dark = low numbers, light text = high numbers) */
-  --color-slate-50: #f5f6fc;
-  --color-slate-100: #eceffa;
-  --color-slate-200: #d7dcf0;
-  --color-slate-300: #b4bbe0;
-  --color-slate-400: #888fb8;   /* section labels */
-  --color-slate-500: #656c96;   /* muted text */
-  --color-slate-600: #464d72;
-  --color-slate-700: #2a3048;   /* strong borders */
-  --color-slate-800: #1b2036;   /* borders / subtle surface */
-  --color-slate-850: #131728;   /* inner surface / hover */
-  --color-slate-900: #0c1020;   /* panel surface */
-  --color-slate-950: #060811;   /* app background */
+  /* Warm charcoal ink ramp (low = dark surface, high = light text) */
+  --color-ink-50: #f7f5f8;
+  --color-ink-100: #ece9ef;
+  --color-ink-200: #d6d2dc;
+  --color-ink-300: #b5b0bf;
+  --color-ink-400: #8f8a9b;
+  --color-ink-500: #6a6575;
+  --color-ink-600: #4a4655;
+  --color-ink-700: #302d38;
+  --color-ink-800: #211f27;
+  --color-ink-850: #1a191f;
+  --color-ink-900: #131217;
+  --color-ink-950: #0b0a0d;
 
-  /* Electric primary accent (kept in the cyan family so existing
-     `cyan-*` usages punch up instead of clashing) */
-  --color-cyan-300: #7bf3ff;
-  --color-cyan-400: #22e0ff;
-  --color-cyan-500: #06c4ef;
-  --color-cyan-600: #0499c6;
+  --color-coral-200: #f9c9bf;
+  --color-coral-300: #f5a191;
+  --color-coral-400: #ef6f5e;
+  --color-coral-500: #e0523f;
+  --color-coral-600: #b83c2c;
+
+  --color-plum-200: #e6d4ed;
+  --color-plum-300: #d3b6df;
+  --color-plum-400: #b48ac8;
+  --color-plum-500: #9163ab;
+  --color-plum-600: #704a86;
+  --color-plum-950: #1e1426;
+
+  --color-sage-300: #bfe5c9;
+  --color-sage-400: #8fd0a4;
+  --color-sage-500: #5fb87e;
+  --color-sage-600: #468f61;
+  --color-sage-950: #0f2217;
 
   /* Motion */
-  --animate-fadeIn: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-fade-in: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fadeIn: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   --animate-shimmer: shimmer 3.5s linear infinite;
   --animate-hero-glow: heroGlow 6s ease-in-out infinite;
-  --animate-float-slow: floatSlow 7s ease-in-out infinite;
+}
+
+/* Accent ramp is variable-driven (see src/utils/theme.ts) */
+@theme inline {
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-950: var(--accent-950);
+  --color-accent: var(--accent-400);
+}
+
+:root {
+  --accent-200: #fbe3b8;
+  --accent-300: #f8cf85;
+  --accent-400: #f2b04a;
+  --accent-500: #e89a2b;
+  --accent-600: #c27a18;
+  --accent-950: #2a1c08;
+  --accent-rgb: 242 176 74;
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
-
 @keyframes heroGlow {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 1; }
-}
-
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
 }
 
 /* ------------------------------------------------------------------
@@ -69,67 +98,85 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
-    background-color: #060811;
-    color: #eceffa;
+    background-color: #0b0a0d;
+    color: #ece9ef;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    /* Layered neon ambience behind the whole app */
     background-image:
-      radial-gradient(ellipse 90% 55% at 50% -12%, rgba(34, 224, 255, 0.12), transparent 60%),
-      radial-gradient(ellipse 70% 55% at 100% 0%, rgba(217, 70, 239, 0.10), transparent 55%),
-      radial-gradient(ellipse 65% 55% at 0% 18%, rgba(124, 58, 237, 0.09), transparent 55%);
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgb(var(--accent-rgb) / 0.10), transparent 62%),
+      radial-gradient(ellipse 60% 50% at 100% 10%, rgba(239, 111, 94, 0.06), transparent 55%),
+      radial-gradient(ellipse 55% 45% at 0% 30%, rgba(180, 138, 200, 0.05), transparent 55%);
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
 
   ::selection {
-    background: #22e0ff;
-    color: #060811;
+    background: var(--accent-400);
+    color: #0b0a0d;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-400);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  button, [role="button"], select, label[for], summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
 }
 
 /* ------------------------------------------------------------------
-   SCROLLBARS — thin, neon-tinted
+   SCROLLBARS
    ------------------------------------------------------------------ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2a3048 transparent;
+  scrollbar-color: #302d38 transparent;
 }
 *::-webkit-scrollbar { width: 9px; height: 9px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #2a3048, #1b2036);
+  background: #302d38;
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #06c4ef, #7c3aed);
+  background: var(--accent-500);
   background-clip: padding-box;
 }
 
 /* ------------------------------------------------------------------
-   RANGE SLIDERS — glowing neon thumbs (used across the analyzer)
+   RANGE SLIDERS — filled track via --range-pct (set by <Slider/>),
+   falls back to a neutral track for the legacy inline sliders.
    ------------------------------------------------------------------ */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
+  height: 20px;
 }
 input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(34,224,255,0.35), rgba(124,58,237,0.35));
+  background: linear-gradient(90deg,
+    var(--accent-400) 0%, var(--accent-400) var(--range-pct, 0%),
+    #302d38 var(--range-pct, 0%), #302d38 100%);
 }
 input[type="range"]::-moz-range-track {
   height: 6px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(34,224,255,0.35), rgba(124,58,237,0.35));
+  background: #302d38;
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--accent-400);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -138,76 +185,116 @@ input[type="range"]::-webkit-slider-thumb {
   height: 16px;
   margin-top: -5px;
   border-radius: 9999px;
-  background: #22e0ff;
-  border: 2px solid #060811;
-  box-shadow: 0 0 0 1px rgba(34,224,255,0.4), 0 0 10px rgba(34,224,255,0.7);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  background: #f7f5f8;
+  border: 3px solid var(--accent-400);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s var(--ease-out-expo), box-shadow 0.15s ease;
 }
-input[type="range"]::-webkit-slider-thumb:hover {
+input[type="range"]:hover::-webkit-slider-thumb {
   transform: scale(1.15);
-  box-shadow: 0 0 0 1px rgba(34,224,255,0.6), 0 0 16px rgba(34,224,255,0.95);
+  box-shadow: 0 0 0 6px rgb(var(--accent-rgb) / 0.16), 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 9999px;
-  background: #22e0ff;
-  border: 2px solid #060811;
-  box-shadow: 0 0 10px rgba(34,224,255,0.7);
+  background: #f7f5f8;
+  border: 3px solid var(--accent-400);
 }
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9999px; }
+input[type="color"]::-moz-color-swatch { border: none; border-radius: 9999px; }
 
 /* ------------------------------------------------------------------
-   REUSABLE PREMIUM UTILITIES
+   REUSABLE UTILITIES
    ------------------------------------------------------------------ */
 
-/* Frosted glass surface for hero / feature panels */
+/* Frosted card surface used by legacy panels + new views */
 .glass {
-  background: linear-gradient(180deg, rgba(18, 22, 40, 0.72), rgba(9, 12, 24, 0.72));
+  background: linear-gradient(180deg, rgba(26, 25, 31, 0.78), rgba(19, 18, 23, 0.78));
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Neon gradient text (brand wordmark, hero labels) */
-.text-neon {
-  background: linear-gradient(90deg, #22e0ff 0%, #7c8bff 45%, #e879f9 100%);
+/* Primary card: flat premium surface with a hairline highlight */
+.card {
+  background: linear-gradient(180deg, rgba(26, 25, 31, 0.9), rgba(19, 18, 23, 0.9));
+  border: 1px solid #211f27;
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+
+/* Brand gradient text */
+.text-brand {
+  background: linear-gradient(95deg, var(--accent-300) 0%, #ef8f78 55%, #e58aa8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-neon { /* legacy alias */
+  background: linear-gradient(95deg, var(--accent-300) 0%, #ef8f78 55%, #e58aa8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Animated shimmering sheen on top of gradient text/buttons */
-.text-shimmer {
-  background: linear-gradient(90deg, #7bf3ff, #e879f9, #7bf3ff);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: var(--animate-shimmer);
-}
-
-/* Soft outer neon ring for the hero stage */
-.neon-ring {
+/* Hero stage frame */
+.stage-frame {
   box-shadow:
-    0 0 0 1px rgba(34, 224, 255, 0.14),
-    0 0 40px -12px rgba(34, 224, 255, 0.35),
-    0 0 90px -30px rgba(217, 70, 239, 0.3),
-    0 24px 60px -30px rgba(0, 0, 0, 0.9);
+    0 0 0 1px rgb(var(--accent-rgb) / 0.14),
+    0 0 60px -26px rgb(var(--accent-rgb) / 0.45),
+    0 30px 70px -36px rgba(0, 0, 0, 0.95);
+}
+.neon-ring { /* legacy alias */
+  box-shadow:
+    0 0 0 1px rgb(var(--accent-rgb) / 0.14),
+    0 0 60px -26px rgb(var(--accent-rgb) / 0.45),
+    0 30px 70px -36px rgba(0, 0, 0, 0.95);
 }
 
-/* Thin gradient hairline divider */
-.neon-divider {
+.hairline {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(34,224,255,0.4), rgba(217,70,239,0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgb(var(--accent-rgb) / 0.35), transparent);
+}
+.neon-divider { /* legacy alias */
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--accent-rgb) / 0.35), transparent);
 }
 
-/* Hide scrollbar but keep scrolling (mode switcher on small screens) */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* Grid-paper backdrop for instrument surfaces */
 .grid-fade {
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(214, 210, 220, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 210, 220, 0.035) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+/* Section eyebrow label */
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8f8a9b;
+}
+
+/* ------------------------------------------------------------------
+   REDUCED MOTION — honour the OS setting everywhere
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
