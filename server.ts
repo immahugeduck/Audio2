@@ -69,7 +69,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Audio2ool dev server listening on http://0.0.0.0:${PORT}`);
+    console.log(`Auralis dev server listening on http://0.0.0.0:${PORT}`);
   });
 }
 
