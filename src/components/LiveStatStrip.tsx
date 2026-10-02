@@ -9,72 +9,46 @@ interface LiveStatStripProps {
 interface Stat {
   label: string;
   value: string;
+  unit?: string;
   accent: string;
-  glow: string;
 }
 
-// A compact premium telemetry bar shown directly under the hero graph.
-// Surfaces the real-time levels & spectral numbers the engine already computes.
+// Clean telemetry strip under the hero graph: the numbers the engine already computes.
 export const LiveStatStrip: React.FC<LiveStatStripProps> = ({ metrics, isLive }) => {
+  const hasTone = isLive && metrics.peakFrequencyHz > 16;
+  const num = (v: number, digits = 1) => (isLive ? v.toFixed(digits) : '—');
   const stats: Stat[] = [
     {
-      label: 'Peak Freq',
-      value: metrics.peakFrequencyHz > 16 ? metrics.peakFrequencyFormatted : '—',
-      accent: 'text-cyan-300',
-      glow: 'rgba(34,224,255,0.55)',
+      label: 'Peak frequency',
+      value: hasTone ? metrics.peakFrequencyFormatted.replace(/\s?k?Hz$/i, '') : '—',
+      unit: hasTone ? (/khz/i.test(metrics.peakFrequencyFormatted) ? 'kHz' : 'Hz') : undefined,
+      accent: 'text-accent-300',
     },
-    {
-      label: 'Note',
-      value: metrics.peakFrequencyHz > 16 ? metrics.peakNoteName : '—',
-      accent: 'text-amber-300',
-      glow: 'rgba(251,191,36,0.5)',
-    },
-    {
-      label: 'RMS',
-      value: `${metrics.rmsDb.toFixed(1)} dB`,
-      accent: 'text-emerald-300',
-      glow: 'rgba(52,211,153,0.5)',
-    },
-    {
-      label: 'Peak',
-      value: `${metrics.peakDb.toFixed(1)} dB`,
-      accent: 'text-fuchsia-300',
-      glow: 'rgba(232,121,249,0.5)',
-    },
+    { label: 'Note', value: hasTone ? metrics.peakNoteName : '—', accent: 'text-coral-300' },
+    { label: 'RMS', value: num(metrics.rmsDb), unit: isLive ? 'dB' : undefined, accent: 'text-sage-300' },
+    { label: 'Peak level', value: num(metrics.peakDb), unit: isLive ? 'dB' : undefined, accent: 'text-plum-300' },
     {
       label: 'Centroid',
-      value: metrics.spectralCentroidHz > 0 ? `${(metrics.spectralCentroidHz / 1000).toFixed(2)}k` : '—',
-      accent: 'text-indigo-300',
-      glow: 'rgba(129,140,248,0.5)',
+      value: isLive && metrics.spectralCentroidHz > 0 ? (metrics.spectralCentroidHz / 1000).toFixed(2) : '—',
+      unit: isLive && metrics.spectralCentroidHz > 0 ? 'kHz' : undefined,
+      accent: 'text-ink-100',
     },
-    {
-      label: 'Crest',
-      value: `${metrics.crestFactorDb.toFixed(1)} dB`,
-      accent: 'text-sky-300',
-      glow: 'rgba(56,189,248,0.5)',
-    },
+    { label: 'Crest', value: num(metrics.crestFactorDb), unit: isLive ? 'dB' : undefined, accent: 'text-ink-100' },
   ];
 
   return (
-    <div className="glass border border-slate-800/80 rounded-2xl px-2 py-2.5 shadow-lg">
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
+    <div className="card overflow-hidden" data-testid="live-stat-strip">
+      <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-ink-800/70">
         {stats.map((s) => (
-          <div
-            key={s.label}
-            className="flex flex-col items-center justify-center px-2 py-1.5 rounded-xl hover:bg-slate-900/60 transition-colors"
-          >
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-0.5">
-              {s.label}
-            </span>
-            <span
-              className={`font-mono font-extrabold text-sm sm:text-base tracking-tight tabular-nums ${s.accent}`}
-              style={isLive && s.value !== '—' ? { textShadow: `0 0 12px ${s.glow}` } : undefined}
-            >
+          <div key={s.label} className="flex flex-col gap-1 px-4 py-3.5 bg-ink-900">
+            <dt className="eyebrow !text-[9.5px]">{s.label}</dt>
+            <dd className={`font-mono text-xl sm:text-[22px] font-medium tabular-nums tracking-tight ${s.accent}`}>
               {s.value}
-            </span>
+              {s.unit && <span className="ml-1 text-xs text-ink-500 font-normal">{s.unit}</span>}
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </div>
   );
 };
