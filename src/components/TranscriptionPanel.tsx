@@ -237,7 +237,7 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
             </div>
           ) : (
             <div className="m-auto text-xs text-ink-500 flex flex-col items-center gap-2 text-center py-4">
-              <FileText className="w-7 h-7 text-ink-600" />
+              <FileText className="w-7 h-7 text-ink-500" />
               <span>
                 Transcription text will display here once recording is complete or file is processed.
               </span>

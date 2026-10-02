@@ -1087,7 +1087,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       ref={containerRef}
       id="spectrum-canvas-container"
       className={`relative w-full bg-ink-950 rounded-2xl overflow-hidden flex flex-col group ${
-        isHero ? 'h-[min(66vh,620px)] min-h-[360px]' : 'h-[220px] sm:h-[280px]'
+        isHero ? 'h-[min(56vh,540px)] min-h-[360px]' : 'h-[220px] sm:h-[280px]'
       }`}
     >
       {/* Floating canvas tools */}
@@ -1182,7 +1182,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
                     className={`p-1 rounded-md hover:bg-ink-800 border transition-all cursor-pointer ${
                       layer.visible
                         ? 'border-ink-850 text-ink-200'
-                        : 'border-ink-850/40 text-ink-600 hover:text-ink-400'
+                        : 'border-ink-850/40 text-ink-500 hover:text-ink-400'
                     }`}
                     title={layer.visible ? 'Hide overlay' : 'Show overlay'}
                   >

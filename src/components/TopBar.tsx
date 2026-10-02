@@ -69,7 +69,7 @@ export const TopBar: React.FC<TopBarProps> = ({ activeRoute, drawerOpen, onToggl
             }`}
           />
           <span className="font-semibold text-ink-100 truncate">{isLive ? sourceText : 'Idle'}</span>
-          <span className="hidden sm:inline text-ink-600">·</span>
+          <span className="hidden sm:inline text-ink-500">·</span>
           <span className="hidden sm:inline font-mono tabular-nums text-accent-300">
             {isLive && hasTone ? `${metrics.peakFrequencyFormatted} ${metrics.peakNoteName}` : '— Hz'}
           </span>

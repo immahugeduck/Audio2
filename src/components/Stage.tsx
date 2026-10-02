@@ -20,15 +20,14 @@ export const Stage: React.FC<StageProps> = ({ variant = 'hero', className = '' }
     getTimeDomainData,
     rangeRef,
     enableMicrophone,
-    loadSampleTrack,
+    playSample,
     play,
   } = useAnalyzer();
 
+  // Demo = (re)start the current sample, or play a loaded file/URL if that is the active source
   const startSample = async () => {
-    if (engineState.sourceType !== 'sample' && engineState.sourceType !== 'file' && engineState.sourceType !== 'url') {
-      await loadSampleTrack(engineState.activeSampleId || 'synthwave');
-    }
-    play();
+    if (engineState.sourceType === 'mic') await playSample(engineState.activeSampleId || 'synthwave');
+    else play();
   };
 
   const paused = engineState.isPaused && engineState.sourceType !== 'mic';

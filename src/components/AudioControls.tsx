@@ -82,7 +82,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             id="tab-source-mic"
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
               engineState.sourceType === 'mic'
-                ? 'bg-rose-500 text-white font-semibold shadow-md'
+                ? 'bg-coral-400 text-ink-950 font-semibold shadow-md'
                 : 'text-ink-400 hover:text-white hover:bg-ink-800'
             }`}
           >

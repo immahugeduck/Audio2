@@ -132,32 +132,32 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
 
       // Create Analyser Node
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = settings.fftSize;
-      analyser.smoothingTimeConstant = settings.smoothing;
-      analyser.minDecibels = settings.minDecibels;
-      analyser.maxDecibels = settings.maxDecibels;
+      analyser.fftSize = settingsRef.current.fftSize;
+      analyser.smoothingTimeConstant = settingsRef.current.smoothing;
+      analyser.minDecibels = settingsRef.current.minDecibels;
+      analyser.maxDecibels = settingsRef.current.maxDecibels;
       analyserRef.current = analyser;
 
       // Equalizer nodes
       const bassFilter = ctx.createBiquadFilter();
       bassFilter.type = 'lowshelf';
       bassFilter.frequency.value = 250;
-      bassFilter.gain.value = engineState.bassGain;
+      bassFilter.gain.value = engineStateRef.current.bassGain;
 
       const midFilter = ctx.createBiquadFilter();
       midFilter.type = 'peaking';
       midFilter.frequency.value = 1000;
       midFilter.Q.value = 1.0;
-      midFilter.gain.value = engineState.midGain;
+      midFilter.gain.value = engineStateRef.current.midGain;
 
       const trebleFilter = ctx.createBiquadFilter();
       trebleFilter.type = 'highshelf';
       trebleFilter.frequency.value = 4000;
-      trebleFilter.gain.value = engineState.trebleGain;
+      trebleFilter.gain.value = engineStateRef.current.trebleGain;
 
       // Panner Node
       const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-      if (panner) panner.pan.value = engineState.pan;
+      if (panner) panner.pan.value = engineStateRef.current.pan;
 
       // Input gain: the first node every source (mic, file, sample, url) feeds,
       // so the analyser, EQ and meters all see the boosted/attenuated signal.
@@ -203,7 +203,7 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
     if (audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
     }
-  }, [settings.fftSize, settings.smoothing, settings.minDecibels, settings.maxDecibels, engineState.bassGain, engineState.midGain, engineState.trebleGain, engineState.pan, engineState.isMuted, engineState.volume]);
+  }, []);
 
   // Sync Analyser Settings
   useEffect(() => {
@@ -326,6 +326,7 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
         isPlaying: false,
         isPaused: false,
         micActive: false,
+        micInfo: null,
       }));
     },
     [initAudioGraph, stopSourceNode]
@@ -356,6 +357,7 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
           isPlaying: false,
           isPaused: false,
           micActive: false,
+          micInfo: null,
         }));
 
         // Auto play on upload
@@ -401,6 +403,7 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
           isPlaying: false,
           isPaused: false,
           micActive: false,
+          micInfo: null,
           urlLoading: false,
           urlError: null,
         }));
@@ -628,6 +631,15 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
       micInfo: null,
     }));
   }, [stopSourceNode]);
+
+  // Load a procedural sample and start it immediately (no stale-closure source check)
+  const playSample = useCallback(
+    async (trackId: string) => {
+      await loadSampleTrack(trackId);
+      playBufferFrom(0);
+    },
+    [loadSampleTrack, playBufferFrom]
+  );
 
   // Audio Control Methods
   const play = useCallback(() => {
@@ -918,6 +930,7 @@ export function useAudioEngine(settings: VisualizerSettings, options: AudioEngin
     mediaStreamDestinationRef,
     loadedFile,
     stopMicrophone,
+    playSample,
     setMicMonitoring,
     setSelectedDevice,
     refreshAudioDevices,

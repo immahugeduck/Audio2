@@ -198,9 +198,9 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
     if (profileHistory.length < 2) {
       return (
         <div className="flex flex-col items-center justify-center h-56 text-ink-500 text-xs text-center">
-          <History className="w-8 h-8 text-ink-600 mb-2 animate-pulse" />
+          <History className="w-8 h-8 text-ink-500 mb-2 animate-pulse" />
           <span>Need at least 2 sampled points to render timeline.</span>
-          <span className="text-[10px] text-ink-600 mt-1">Start recording and wait a moment...</span>
+          <span className="text-[10px] text-ink-500 mt-1">Start recording and wait a moment...</span>
         </div>
       );
     }
@@ -309,32 +309,32 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
             onMouseLeave={handleMouseLeave}
           >
             {/* Grid Lines */}
-            <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#1e293b" strokeWidth={1} strokeDasharray="3 3" />
-            <line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke="#1e293b" strokeWidth={1} strokeDasharray="3 3" />
-            <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#334155" strokeWidth={1} />
+            <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#2c2a33" strokeWidth={1} strokeDasharray="3 3" />
+            <line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke="#2c2a33" strokeWidth={1} strokeDasharray="3 3" />
+            <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#403d49" strokeWidth={1} />
 
             {/* Vertical Time markers */}
-            <line x1={paddingX} y1={paddingY} x2={paddingX} y2={chartHeight - paddingY} stroke="#1e293b" />
-            <line x1={chartWidth - paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#1e293b" />
+            <line x1={paddingX} y1={paddingY} x2={paddingX} y2={chartHeight - paddingY} stroke="#2c2a33" />
+            <line x1={chartWidth - paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#2c2a33" />
 
             {/* Y Axis Labels (Left: dB) */}
-            <text x={paddingX - 8} y={paddingY + 4} fill="#64748b" fontSize={9} textAnchor="end">0 dB</text>
-            <text x={paddingX - 8} y={chartHeight / 2 + 3} fill="#64748b" fontSize={9} textAnchor="end">-45 dB</text>
-            <text x={paddingX - 8} y={chartHeight - paddingY + 3} fill="#64748b" fontSize={9} textAnchor="end">-90 dB</text>
+            <text x={paddingX - 8} y={paddingY + 4} fill="#8f8a9b" fontSize={9} textAnchor="end">0 dB</text>
+            <text x={paddingX - 8} y={chartHeight / 2 + 3} fill="#8f8a9b" fontSize={9} textAnchor="end">-45 dB</text>
+            <text x={paddingX - 8} y={chartHeight - paddingY + 3} fill="#8f8a9b" fontSize={9} textAnchor="end">-90 dB</text>
 
             {/* Y Axis Labels (Right: Hz) */}
-            <text x={chartWidth - paddingX + 8} y={paddingY + 4} fill="#0ea5e9" fontSize={9} textAnchor="start">{Math.round(maxFreqPlot)}Hz</text>
-            <text x={chartWidth - paddingX + 8} y={chartHeight / 2 + 3} fill="#0ea5e9" fontSize={9} textAnchor="start">{Math.round(maxFreqPlot / 2)}Hz</text>
-            <text x={chartWidth - paddingX + 8} y={chartHeight - paddingY + 3} fill="#0ea5e9" fontSize={9} textAnchor="start">0Hz</text>
+            <text x={chartWidth - paddingX + 8} y={paddingY + 4} fill="#b48ac8" fontSize={9} textAnchor="start">{Math.round(maxFreqPlot)}Hz</text>
+            <text x={chartWidth - paddingX + 8} y={chartHeight / 2 + 3} fill="#b48ac8" fontSize={9} textAnchor="start">{Math.round(maxFreqPlot / 2)}Hz</text>
+            <text x={chartWidth - paddingX + 8} y={chartHeight - paddingY + 3} fill="#b48ac8" fontSize={9} textAnchor="start">0Hz</text>
 
             {/* Volume Shading */}
             <path d={fillPath} fill="url(#volumeGrad)" opacity={0.15} />
 
             {/* Volume Line */}
-            <path d={rmsPath} fill="none" stroke="#10b981" strokeWidth={2} />
+            <path d={rmsPath} fill="none" stroke="#8fd0a4" strokeWidth={2} />
 
             {/* Frequency Line */}
-            <path d={freqPath} fill="none" stroke="#06b6d4" strokeWidth={1.5} strokeDasharray="3 3" />
+            <path d={freqPath} fill="none" stroke="#f2b04a" strokeWidth={1.5} strokeDasharray="3 3" />
 
             {/* Highlighted hover line */}
             {hoveredIndex !== null && rmsPoints[hoveredIndex] && (
@@ -344,28 +344,28 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
                   y1={paddingY} 
                   x2={rmsPoints[hoveredIndex].x} 
                   y2={chartHeight - paddingY} 
-                  stroke="#38bdf8" 
+                  stroke="#f8cf85" 
                   strokeWidth={1} 
                   opacity={0.6}
                 />
-                <circle cx={rmsPoints[hoveredIndex].x} cy={rmsPoints[hoveredIndex].y} r={4.5} fill="#10b981" stroke="#ffffff" strokeWidth={1.5} />
-                <circle cx={freqPoints[hoveredIndex].x} cy={freqPoints[hoveredIndex].y} r={4.5} fill="#06b6d4" stroke="#ffffff" strokeWidth={1.5} />
+                <circle cx={rmsPoints[hoveredIndex].x} cy={rmsPoints[hoveredIndex].y} r={4.5} fill="#8fd0a4" stroke="#ffffff" strokeWidth={1.5} />
+                <circle cx={freqPoints[hoveredIndex].x} cy={freqPoints[hoveredIndex].y} r={4.5} fill="#f2b04a" stroke="#ffffff" strokeWidth={1.5} />
               </g>
             )}
 
             {/* Time labels on X Axis */}
-            <text x={paddingX} y={chartHeight - 8} fill="#475569" fontSize={8} textAnchor="middle">0.0s (Start)</text>
-            <text x={chartWidth / 2} y={chartHeight - 8} fill="#475569" fontSize={8} textAnchor="middle">
+            <text x={paddingX} y={chartHeight - 8} fill="#8f8a9b" fontSize={8} textAnchor="middle">0.0s (Start)</text>
+            <text x={chartWidth / 2} y={chartHeight - 8} fill="#8f8a9b" fontSize={8} textAnchor="middle">
               {((profileHistory[profileHistory.length - 1].elapsedTimeSec) / 2).toFixed(1)}s
             </text>
-            <text x={chartWidth - paddingX} y={chartHeight - 8} fill="#475569" fontSize={8} textAnchor="middle">
+            <text x={chartWidth - paddingX} y={chartHeight - 8} fill="#8f8a9b" fontSize={8} textAnchor="middle">
               {profileHistory[profileHistory.length - 1].elapsedTimeSec.toFixed(1)}s (End)
             </text>
 
             <defs>
               <linearGradient id="volumeGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                <stop offset="0%" stopColor="#8fd0a4" />
+                <stop offset="100%" stopColor="#8fd0a4" stopOpacity="0" />
               </linearGradient>
             </defs>
           </svg>
@@ -393,7 +393,7 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
             </>
           ) : (
             <div className="text-ink-500 italic mx-auto text-[11px] flex items-center gap-1.5 py-0.5">
-              <Info className="w-3.5 h-3.5 text-ink-600" />
+              <Info className="w-3.5 h-3.5 text-ink-500" />
               Hover your cursor over the chart points above to inspect discrete real-time sound values.
             </div>
           )}
@@ -407,7 +407,7 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
     if (profileHistory.length < 2) {
       return (
         <div className="flex flex-col items-center justify-center h-56 text-ink-500 text-xs text-center">
-          <History className="w-8 h-8 text-ink-600 mb-2 animate-pulse" />
+          <History className="w-8 h-8 text-ink-500 mb-2 animate-pulse" />
           <span>Waterfall heatmap requires active session points.</span>
         </div>
       );
@@ -468,7 +468,7 @@ export const SoundTimelineProfiler: React.FC<SoundTimelineProfilerProps> = ({
     if (!summary) {
       return (
         <div className="flex flex-col items-center justify-center h-56 text-ink-500 text-xs text-center">
-          <History className="w-8 h-8 text-ink-600 mb-2 animate-pulse" />
+          <History className="w-8 h-8 text-ink-500 mb-2 animate-pulse" />
           <span>Acoustic signatures comparison becomes available once profile session starts.</span>
         </div>
       );

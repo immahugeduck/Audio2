@@ -39,6 +39,7 @@ export interface AnalyzerContextValue {
   setPlaybackRate: (r: number) => void;
   setPan: (p: number) => void;
   loadSampleTrack: (id: string) => Promise<void>;
+  playSample: (id: string) => Promise<void>;
   loadAudioFile: (f: File) => Promise<void>;
   loadAudioFromUrl: (url: string, title?: string) => Promise<void>;
   enableMicrophone: (deviceId?: string) => Promise<void>;
@@ -180,6 +181,7 @@ export const AnalyzerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setPlaybackRate: engine.setPlaybackRate,
       setPan: engine.setPan,
       loadSampleTrack: engine.loadSampleTrack,
+      playSample: engine.playSample,
       loadAudioFile: engine.loadAudioFile,
       loadAudioFromUrl: engine.loadAudioFromUrl,
       enableMicrophone,
@@ -203,7 +205,7 @@ export const AnalyzerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [settings, engineState, metrics, engine.sampleRate, engine.loadedFile, isLive, profile, isCalibrating, latestAiResult, isReportOpen,
-     engine.play, engine.pause, engine.seek, setVolume, selectInputDevice, enableMicrophone, toggleMicMonitoring, engine.setEq, engine.loadSampleTrack, engine.loadAudioFile, engine.loadAudioFromUrl]
+     engine.play, engine.pause, engine.seek, setVolume, selectInputDevice, enableMicrophone, toggleMicMonitoring, engine.setEq, engine.loadSampleTrack, engine.playSample, engine.loadAudioFile, engine.loadAudioFromUrl]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -140,7 +140,7 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
 
       {!isActive ? (
         <div className="bg-ink-950/80 rounded-xl border border-ink-800 p-6 text-center flex flex-col items-center justify-center gap-2">
-          <Power className="w-8 h-8 text-ink-600" />
+          <Power className="w-8 h-8 text-ink-500" />
           <h4 className="text-xs font-bold text-ink-400">Harmonizer Analysis Engine Paused</h4>
           <p className="text-xs text-ink-500 max-w-sm leading-relaxed">
             Harmonic overtone detection and pitch calculation are paused to conserve compute power. Click 'Engine Paused' above to reactivate.
@@ -181,7 +181,7 @@ export const HarmonicTuner: React.FC<HarmonicTunerProps> = ({
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-emerald-500 z-10" />
 
                 {/* Flat (-50) to Sharp (+50) markers */}
-                <div className="w-full flex justify-between text-[9px] font-mono text-ink-600 z-0">
+                <div className="w-full flex justify-between text-[9px] font-mono text-ink-500 z-0">
                   <span>-50 Flat</span>
                   <span>-25</span>
                   <span className="text-emerald-400 font-bold">0</span>

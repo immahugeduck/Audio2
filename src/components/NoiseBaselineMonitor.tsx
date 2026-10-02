@@ -203,7 +203,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
             );
           })}
         </div>
-        <div className="flex justify-between text-[9px] text-ink-600 font-mono px-0.5">
+        <div className="flex justify-between text-[9px] text-ink-500 font-mono px-0.5">
           <span>20 Hz</span>
           <span>250 Hz</span>
           <span>2 kHz</span>

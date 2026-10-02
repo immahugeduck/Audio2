@@ -5,12 +5,12 @@ import { Button } from './ui';
 
 /** Shown at the top of tool views that need a live signal, when there is none. */
 export const SourceBanner: React.FC<{ message?: string }> = ({ message }) => {
-  const { isLive, engineState, enableMicrophone, loadSampleTrack, play } = useAnalyzer();
+  const { isLive, engineState, enableMicrophone, playSample, play } = useAnalyzer();
   if (isLive) return null;
 
   const demo = async () => {
-    if (engineState.sourceType === 'mic') await loadSampleTrack(engineState.activeSampleId || 'synthwave');
-    play();
+    if (engineState.sourceType === 'mic') await playSample(engineState.activeSampleId || 'synthwave');
+    else play();
   };
 
   return (

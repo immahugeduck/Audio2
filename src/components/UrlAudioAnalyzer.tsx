@@ -345,7 +345,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                     <Globe className="w-3 h-3" /> Audio Stream
                   </span>
                 )}
-                <Zap className="w-3.5 h-3.5 text-ink-600 group-hover:text-amber-400 transition-colors" />
+                <Zap className="w-3.5 h-3.5 text-ink-500 group-hover:text-amber-400 transition-colors" />
               </div>
               <span className="text-xs font-semibold text-ink-200 group-hover:text-white line-clamp-2">
                 {preset.title}

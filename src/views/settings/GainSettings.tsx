@@ -3,6 +3,7 @@ import { Volume2, VolumeX, Sliders, Waves, Wand2 } from 'lucide-react';
 import { useAnalyzer } from '../../context/AnalyzerContext';
 import { Section, Slider, Toggle, Button } from '../../components/ui';
 import { GAIN_LIMITS } from '../../utils/settingsStore';
+import { useTrueLevel } from '../../hooks/useTrueLevel';
 
 const RANGE_PRESETS = [
   { label: 'Studio', min: -90, max: -10, hint: '−90 … −10 dB' },
@@ -14,7 +15,7 @@ const RANGE_PRESETS = [
 const fmtDb = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`;
 
 export const GainSettings: React.FC = () => {
-  const { settings, visual: v, updateGain, updateVisual, setVolume, engineState, toggleMute, metrics, isLive, rangeRef } = useAnalyzer();
+  const { settings, visual: v, updateGain, updateVisual, setVolume, engineState, toggleMute, isLive, rangeRef, getTimeDomainData } = useAnalyzer();
   const { gain } = settings;
 
   // Show the effective analyser window (it moves while auto-range is on)
@@ -24,9 +25,12 @@ export const GainSettings: React.FC = () => {
     return () => window.clearInterval(t);
   }, [rangeRef]);
 
-  const levelPct = Math.min(100, Math.max(0, (metrics.rmsDb + 90) * (100 / 90)));
-  const peakPct = Math.min(100, Math.max(0, (metrics.peakDb + 90) * (100 / 90)));
-  const clipping = isLive && metrics.peakDb > -1;
+  const level = useTrueLevel(getTimeDomainData, isLive);
+  const toPct = (db: number) => (Number.isFinite(db) ? Math.min(100, Math.max(0, ((db + 60) / 60) * 100)) : 0);
+  const levelPct = toPct(level.rmsDb);
+  const peakPct = toPct(level.peakDb);
+  const clipping = isLive && level.peakDb > -0.5;
+  const fmt = (db: number) => (Number.isFinite(db) ? db.toFixed(1) : '−∞');
 
   return (
     <div className="flex flex-col gap-5">
@@ -53,9 +57,9 @@ export const GainSettings: React.FC = () => {
         />
         <div className="rounded-xl bg-ink-950/60 border border-ink-800 p-3.5" data-testid="level-meter">
           <div className="flex items-center justify-between mb-2">
-            <span className="eyebrow !text-[9.5px]">Level after gain</span>
+            <span className="eyebrow !text-[9.5px]">Level after gain (dBFS)</span>
             <span className={`font-mono text-xs tabular-nums ${clipping ? 'text-coral-300' : 'text-ink-200'}`}>
-              {isLive ? `RMS ${metrics.rmsDb.toFixed(1)} · peak ${metrics.peakDb.toFixed(1)} dB` : 'no signal'}
+              {isLive ? `RMS ${fmt(level.rmsDb)} · peak ${fmt(level.peakDb)} dBFS` : 'no signal'}
               {clipping && ' · CLIP'}
             </span>
           </div>

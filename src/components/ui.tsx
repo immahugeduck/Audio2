@@ -187,7 +187,7 @@ export const PageHeader: React.FC<{ title: string; subtitle?: string; actions?: 
   <div className="flex flex-wrap items-end justify-between gap-4">
     <div className="min-w-0">
       {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-      <h1 className="font-display text-4xl sm:text-5xl leading-none tracking-tight text-ink-50">{title}</h1>
+      <h1 className="font-display text-3xl sm:text-4xl leading-none tracking-tight text-ink-50">{title}</h1>
       {subtitle && <p className="text-sm text-ink-400 mt-2 max-w-2xl">{subtitle}</p>}
     </div>
     {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
