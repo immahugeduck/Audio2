@@ -40,7 +40,7 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
   const rmsPercentage = Math.min(100, Math.max(0, (metrics.rmsDb + 90) * (100 / 90)));
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
+    <div className="bg-ink-900/90 border border-ink-800 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
               <h3 className="text-sm font-black tracking-wide text-white uppercase">
                 Microphone & Input Settings
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-ink-400">
                 Choose live input sources, Bluetooth wearables, or system audio feeds
               </p>
             </div>
@@ -61,8 +61,8 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
         {/* Action Status Badges */}
         <div className="flex items-center gap-2 flex-wrap">
           {isBluetoothConnected && (
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center gap-1">
-              <Bluetooth className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-accent-500/10 border border-accent-500/30 text-accent-300 flex items-center gap-1">
+              <Bluetooth className="w-3.5 h-3.5 text-accent-400" />
               BT READY: {bluetoothDeviceName ? bluetoothDeviceName.split('(')[0].trim() : 'Wireless'}
             </span>
           )}
@@ -72,7 +72,7 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
               LIVE STREAMING
             </span>
           ) : (
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-slate-850 border border-slate-800 text-slate-500">
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-ink-850 border border-ink-800 text-ink-500">
               STANDBY
             </span>
           )}
@@ -82,14 +82,14 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         {/* Device Selection Dropdown (6 Cols) */}
         <div className="lg:col-span-6 flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <label className="text-[10px] font-bold text-ink-400 uppercase tracking-wider block">
             Select Active Device
           </label>
           <div className="relative">
             <select
               value={selectedDeviceId || 'default'}
               onChange={handleDeviceChange}
-              className="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 text-slate-200 text-xs rounded-xl py-2.5 pl-9 pr-8 outline-none cursor-pointer appearance-none transition-all font-semibold"
+              className="w-full bg-ink-950 border border-ink-800 focus:border-accent-500 text-ink-200 text-xs rounded-xl py-2.5 pl-9 pr-8 outline-none cursor-pointer appearance-none transition-all font-semibold"
             >
               {audioInputDevices.length === 0 ? (
                 <option value="default">Default Input Device</option>
@@ -101,14 +101,14 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
                 ))
               )}
             </select>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none">
               {isBluetoothActive ? (
-                <Bluetooth className="w-4 h-4 text-cyan-400" />
+                <Bluetooth className="w-4 h-4 text-accent-400" />
               ) : (
                 <Laptop className="w-4 h-4 text-rose-400" />
               )}
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-ink-500">
               <RefreshCw className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -116,7 +116,7 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
 
         {/* Monitoring Mode (3 Cols) */}
         <div className="lg:col-span-3 flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <label className="text-[10px] font-bold text-ink-400 uppercase tracking-wider block">
             Audio Playback Feedback
           </label>
           <button
@@ -124,28 +124,28 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
             className={`w-full py-2 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-between gap-2 cursor-pointer ${
               micMonitoring
                 ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.1)]'
-                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-300'
+                : 'bg-ink-950 border-ink-800 text-ink-400 hover:text-ink-300'
             }`}
             title="Warning: Feedback may occur if using speakers without headphones!"
           >
             <div className="flex items-center gap-1.5">
-              {micMonitoring ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+              {micMonitoring ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-ink-400" />}
               <span>{micMonitoring ? 'Feedback Monitor ON' : 'Feedback Monitor OFF'}</span>
             </div>
-            <span className={`w-1.5 h-1.5 rounded-full ${micMonitoring ? 'bg-amber-400 animate-ping' : 'bg-slate-600'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${micMonitoring ? 'bg-amber-400 animate-ping' : 'bg-ink-600'}`} />
           </button>
         </div>
 
         {/* Real-time Level VU Indicator (3 Cols) */}
         <div className="lg:col-span-3 flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <label className="text-[10px] font-bold text-ink-400 uppercase tracking-wider block">
             Mic Input Level Meter
           </label>
-          <div className="bg-slate-950 border border-slate-850 p-2 rounded-xl flex items-center gap-3">
-            <span className="text-[10px] font-mono font-bold text-slate-400 tracking-tight shrink-0 min-w-[42px] text-right">
+          <div className="bg-ink-950 border border-ink-850 p-2 rounded-xl flex items-center gap-3">
+            <span className="text-[10px] font-mono font-bold text-ink-400 tracking-tight shrink-0 min-w-[42px] text-right">
               {micActive && metrics.rmsDb > -90 ? `${Math.round(metrics.rmsDb)} dB` : '-INF dB'}
             </span>
-            <div className="flex-1 h-3 bg-slate-900 rounded-full overflow-hidden relative border border-slate-850">
+            <div className="flex-1 h-3 bg-ink-900 rounded-full overflow-hidden relative border border-ink-850">
               <div
                 className={`h-full rounded-full transition-all duration-75 ${
                   rmsPercentage > 85
@@ -170,12 +170,12 @@ export const MicSettingsSelector: React.FC<MicSettingsSelectorProps> = ({
       )}
 
       {/* Mic Status and tips footer */}
-      <div className="mt-4 pt-3.5 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+      <div className="mt-4 pt-3.5 border-t border-ink-800/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-ink-400">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="font-semibold text-slate-300">Active device config:</span>
+          <span className="font-semibold text-ink-300">Active device config:</span>
           <span>{activeDevice ? activeDevice.label : 'None Selected'}</span>
           <span>&bull;</span>
-          <span className="text-slate-400">
+          <span className="text-ink-400">
             {isBluetoothActive ? 'Bluetooth Latency compensated' : 'Direct acoustic path'}
           </span>
         </div>

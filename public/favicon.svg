@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Auralis">
+  <defs>
+    <linearGradient id="g" x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8cf85"/>
+      <stop offset="0.55" stop-color="#f2b04a"/>
+      <stop offset="1" stop-color="#ef6f5e"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#g)"/>
+  <g fill="#17110c">
+    <rect x="7" y="31" width="6" height="14" rx="3"/>
+    <rect x="18" y="22" width="6" height="28" rx="3"/>
+    <rect x="29" y="12" width="6" height="42" rx="3"/>
+    <rect x="40" y="22" width="6" height="28" rx="3"/>
+    <rect x="51" y="31" width="6" height="14" rx="3"/>
+  </g>
+  <rect x="18" y="38" width="28" height="3.5" rx="1.75" fill="url(#g)"/>
+</svg>

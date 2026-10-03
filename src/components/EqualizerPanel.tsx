@@ -23,17 +23,17 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-xl flex flex-col gap-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+    <div className="bg-ink-900/90 rounded-2xl border border-ink-800 p-4 sm:p-5 shadow-xl flex flex-col gap-4">
+      <div className="flex items-center justify-between pb-3 border-b border-ink-800">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
+          <SlidersHorizontal className="w-4 h-4 text-accent-400" />
           <h2 className="text-sm font-semibold text-white">3-Band EQ & Spatial Pan</h2>
         </div>
 
         <button
           onClick={resetEq}
           id="btn-reset-eq"
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs text-ink-400 hover:text-white transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3 h-3" />
           Reset Filters
@@ -42,7 +42,7 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
 
       {/* EQ Preset Badges */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-400 font-medium mr-1">Presets:</span>
+        <span className="text-xs text-ink-400 font-medium mr-1">Presets:</span>
         {EQ_PRESETS.map((preset) => {
           const isActive =
             engineState.bassGain === preset.bass &&
@@ -55,8 +55,8 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
               id={`btn-eq-preset-${preset.id}`}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold shadow-sm'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                  ? 'bg-accent-500/20 border-accent-500 text-accent-300 font-semibold shadow-sm'
+                  : 'bg-ink-950 border-ink-800 text-ink-400 hover:text-white hover:border-ink-700'
               }`}
             >
               {preset.name}
@@ -68,10 +68,10 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
       {/* 3-Band Vertical/Horizontal Sliders */}
       <div className="grid grid-cols-3 gap-3">
         {/* Bass Band */}
-        <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <div className="flex flex-col gap-2 bg-ink-950 p-3 rounded-xl border border-ink-800">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-400 font-medium">Bass (250Hz)</span>
-            <span className={`font-mono font-semibold ${engineState.bassGain > 0 ? 'text-emerald-400' : engineState.bassGain < 0 ? 'text-rose-400' : 'text-slate-400'}`}>
+            <span className="text-ink-400 font-medium">Bass (250Hz)</span>
+            <span className={`font-mono font-semibold ${engineState.bassGain > 0 ? 'text-emerald-400' : engineState.bassGain < 0 ? 'text-rose-400' : 'text-ink-400'}`}>
               {engineState.bassGain > 0 ? `+${engineState.bassGain}` : engineState.bassGain} dB
             </span>
           </div>
@@ -83,15 +83,15 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
             value={engineState.bassGain}
             onChange={(e) => setEq(parseFloat(e.target.value), engineState.midGain, engineState.trebleGain)}
             id="input-eq-bass"
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-1.5 bg-ink-800 rounded-lg appearance-none cursor-pointer accent-accent-400"
           />
         </div>
 
         {/* Mid Band */}
-        <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <div className="flex flex-col gap-2 bg-ink-950 p-3 rounded-xl border border-ink-800">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-400 font-medium">Mid (1kHz)</span>
-            <span className={`font-mono font-semibold ${engineState.midGain > 0 ? 'text-emerald-400' : engineState.midGain < 0 ? 'text-rose-400' : 'text-slate-400'}`}>
+            <span className="text-ink-400 font-medium">Mid (1kHz)</span>
+            <span className={`font-mono font-semibold ${engineState.midGain > 0 ? 'text-emerald-400' : engineState.midGain < 0 ? 'text-rose-400' : 'text-ink-400'}`}>
               {engineState.midGain > 0 ? `+${engineState.midGain}` : engineState.midGain} dB
             </span>
           </div>
@@ -103,15 +103,15 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
             value={engineState.midGain}
             onChange={(e) => setEq(engineState.bassGain, parseFloat(e.target.value), engineState.trebleGain)}
             id="input-eq-mid"
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-1.5 bg-ink-800 rounded-lg appearance-none cursor-pointer accent-accent-400"
           />
         </div>
 
         {/* Treble Band */}
-        <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <div className="flex flex-col gap-2 bg-ink-950 p-3 rounded-xl border border-ink-800">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-400 font-medium">Treble (4kHz)</span>
-            <span className={`font-mono font-semibold ${engineState.trebleGain > 0 ? 'text-emerald-400' : engineState.trebleGain < 0 ? 'text-rose-400' : 'text-slate-400'}`}>
+            <span className="text-ink-400 font-medium">Treble (4kHz)</span>
+            <span className={`font-mono font-semibold ${engineState.trebleGain > 0 ? 'text-emerald-400' : engineState.trebleGain < 0 ? 'text-rose-400' : 'text-ink-400'}`}>
               {engineState.trebleGain > 0 ? `+${engineState.trebleGain}` : engineState.trebleGain} dB
             </span>
           </div>
@@ -123,7 +123,7 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
             value={engineState.trebleGain}
             onChange={(e) => setEq(engineState.bassGain, engineState.midGain, parseFloat(e.target.value))}
             id="input-eq-treble"
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-1.5 bg-ink-800 rounded-lg appearance-none cursor-pointer accent-accent-400"
           />
         </div>
       </div>
@@ -131,9 +131,9 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
       {/* Speed & Panner Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         {/* Playback Speed Selector */}
-        <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <FastForward className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="flex flex-col gap-2 bg-ink-950 p-3 rounded-xl border border-ink-800">
+          <div className="flex items-center gap-1.5 text-xs text-ink-400 font-medium">
+            <FastForward className="w-3.5 h-3.5 text-accent-400" />
             Playback Pitch & Speed
           </div>
           <div className="flex items-center gap-1">
@@ -144,8 +144,8 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
                 id={`btn-speed-${rate}`}
                 className={`flex-1 py-1 text-xs font-mono font-medium rounded-lg border transition-all cursor-pointer ${
                   engineState.playbackRate === rate
-                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-accent-500/20 border-accent-500 text-accent-300 font-bold'
+                    : 'bg-ink-900 border-ink-800 text-ink-400 hover:text-white'
                 }`}
               >
                 {rate}x
@@ -155,13 +155,13 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
         </div>
 
         {/* Stereo Panner Slider */}
-        <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <div className="flex flex-col gap-2 bg-ink-950 p-3 rounded-xl border border-ink-800">
           <div className="flex justify-between items-center text-xs">
-            <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-              <Compass className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="flex items-center gap-1.5 text-ink-400 font-medium">
+              <Compass className="w-3.5 h-3.5 text-accent-400" />
               Stereo Balance (Pan)
             </div>
-            <span className="font-mono text-cyan-400">
+            <span className="font-mono text-accent-400">
               {engineState.pan < 0
                 ? `${Math.abs(Math.round(engineState.pan * 100))}% L`
                 : engineState.pan > 0
@@ -177,7 +177,7 @@ export const EqualizerPanel: React.FC<EqualizerPanelProps> = ({
             value={engineState.pan}
             onChange={(e) => setPan(parseFloat(e.target.value))}
             id="input-stereo-pan"
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-1.5 bg-ink-800 rounded-lg appearance-none cursor-pointer accent-accent-400"
           />
         </div>
       </div>

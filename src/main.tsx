@@ -2,6 +2,11 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { loadSettings } from './utils/settingsStore';
+import { applyAccentTheme } from './utils/theme';
+
+// Apply the saved accent before first paint to avoid a color flash
+applyAccentTheme(loadSettings().appearance.accentId);
 
 // Prevent third-party cross-origin iframe SecurityError from crashing preview
 window.addEventListener('error', (event) => {

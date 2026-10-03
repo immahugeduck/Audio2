@@ -38,10 +38,10 @@ export const DropZone: React.FC<DropZoneProps> = ({ onFileDrop, children }) => {
       className="relative min-h-screen"
     >
       {isDragging && (
-        <div className="fixed inset-0 z-50 bg-cyan-950/80 backdrop-blur-md border-4 border-dashed border-cyan-400 flex flex-col items-center justify-center text-cyan-200 gap-4 animate-fade-in pointer-events-none">
-          <UploadCloud className="w-16 h-16 animate-bounce text-cyan-400" />
+        <div className="fixed inset-0 z-50 bg-accent-950/80 backdrop-blur-md border-4 border-dashed border-accent-400 flex flex-col items-center justify-center text-accent-200 gap-4 animate-fade-in pointer-events-none">
+          <UploadCloud className="w-16 h-16 animate-bounce text-accent-400" />
           <h2 className="text-2xl font-bold tracking-tight">Drop Audio File to Analyze</h2>
-          <p className="text-sm text-cyan-300/80">Supports MP3, WAV, OGG, FLAC, M4A, AAC</p>
+          <p className="text-sm text-accent-300/80">Supports MP3, WAV, OGG, FLAC, M4A, AAC</p>
         </div>
       )}
       {children}

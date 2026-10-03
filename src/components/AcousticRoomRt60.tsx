@@ -256,11 +256,11 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
   }, []);
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-amber-500/20 to-cyan-500/20 border border-amber-500/30 text-amber-300">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-amber-500/20 to-accent-500/20 border border-amber-500/30 text-amber-300">
             <Timer className="w-5 h-5" />
           </div>
           <div>
@@ -270,7 +270,7 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
                 REVERB TIME (RT60)
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Measures sound decay rate (time taken for sound level to drop 60 dB) to assess room acoustic treatment
             </p>
           </div>
@@ -290,14 +290,14 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
       </div>
 
       {/* Control Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ink-950 p-4 rounded-xl border border-ink-800/80">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Test Signal Method</label>
+          <label className="text-[10px] font-bold text-ink-500 uppercase tracking-wider">Test Signal Method</label>
           <select
             value={testSignalType}
             onChange={(e) => setTestSignalType(e.target.value as any)}
             disabled={isMeasuring}
-            className="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-lg p-2 focus:outline-none focus:border-amber-500 cursor-pointer disabled:opacity-50"
+            className="bg-ink-900 border border-ink-800 text-ink-200 text-xs rounded-lg p-2 focus:outline-none focus:border-amber-500 cursor-pointer disabled:opacity-50"
           >
             <option value="clap">Manual Clap / Handsnap / Balloon Pop</option>
             <option value="burst">Auto Impulse Pink Noise Burst</option>
@@ -309,7 +309,7 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
             onClick={startRt60Measurement}
             disabled={isMeasuring || !isListening}
             id="btn-trigger-rt60-test"
-            className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-amber-500/20 to-cyan-500/20 hover:from-amber-500/30 hover:to-cyan-500/30 border border-amber-500/40 text-amber-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-amber-500/20 to-accent-500/20 hover:from-amber-500/30 hover:to-accent-500/30 border border-amber-500/40 text-amber-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Play className="w-4 h-4 text-amber-400" />
             {isMeasuring ? 'Listening for Sound Impulse...' : 'Measure Room RT60 Reverb Decay'}
@@ -318,7 +318,7 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
       </div>
 
       {/* Status Banner */}
-      <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 text-xs text-slate-300 flex items-center gap-2">
+      <div className="bg-ink-950/80 p-2.5 rounded-lg border border-ink-800 text-xs text-ink-300 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
         <span className="font-medium">{statusText}</span>
       </div>
@@ -329,70 +329,70 @@ export const AcousticRoomRt60: React.FC<AcousticRoomRt60Props> = ({
           {/* Main Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Overall RT60 */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-amber-500/30 flex flex-col justify-between">
+            <div className="bg-ink-950 p-4 rounded-xl border border-amber-500/30 flex flex-col justify-between">
               <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Overall RT60 Reverb Time</span>
               <div className="text-2xl font-bold font-mono text-white mt-1">
-                {measurement.rt60OverallSec} <span className="text-sm font-normal text-slate-400">sec</span>
+                {measurement.rt60OverallSec} <span className="text-sm font-normal text-ink-400">sec</span>
               </div>
-              <span className="text-[10px] text-slate-500 mt-2 border-t border-slate-900 pt-1">
+              <span className="text-[10px] text-ink-500 mt-2 border-t border-ink-900 pt-1">
                 Target range: 0.30s - 0.60s
               </span>
             </div>
 
             {/* Bass RT60 */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Bass Decay (&lt;250 Hz)</span>
+            <div className="bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col justify-between">
+              <span className="text-[10px] font-bold text-sage-400 uppercase tracking-wider">Bass Decay (&lt;250 Hz)</span>
               <div className="text-2xl font-bold font-mono text-white mt-1">
-                {measurement.rt60BassSec} <span className="text-sm font-normal text-slate-400">sec</span>
+                {measurement.rt60BassSec} <span className="text-sm font-normal text-ink-400">sec</span>
               </div>
-              <span className="text-[10px] text-slate-500 mt-2 border-t border-slate-900 pt-1">
+              <span className="text-[10px] text-ink-500 mt-2 border-t border-ink-900 pt-1">
                 {measurement.rt60BassSec > 0.8 ? 'Needs Bass Traps' : 'Bass Damped'}
               </span>
             </div>
 
             {/* Mid RT60 */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div className="bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col justify-between">
               <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Mid Decay (250Hz-2kHz)</span>
               <div className="text-2xl font-bold font-mono text-white mt-1">
-                {measurement.rt60MidSec} <span className="text-sm font-normal text-slate-400">sec</span>
+                {measurement.rt60MidSec} <span className="text-sm font-normal text-ink-400">sec</span>
               </div>
-              <span className="text-[10px] text-slate-500 mt-2 border-t border-slate-900 pt-1">
+              <span className="text-[10px] text-ink-500 mt-2 border-t border-ink-900 pt-1">
                 Speech Intelligibility
               </span>
             </div>
 
             {/* Treble RT60 */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div className="bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col justify-between">
               <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Treble Decay (&gt;2 kHz)</span>
               <div className="text-2xl font-bold font-mono text-white mt-1">
-                {measurement.rt60TrebleSec} <span className="text-sm font-normal text-slate-400">sec</span>
+                {measurement.rt60TrebleSec} <span className="text-sm font-normal text-ink-400">sec</span>
               </div>
-              <span className="text-[10px] text-slate-500 mt-2 border-t border-slate-900 pt-1">
+              <span className="text-[10px] text-ink-500 mt-2 border-t border-ink-900 pt-1">
                 High frequency air decay
               </span>
             </div>
           </div>
 
           {/* Room Verdict & Recommendations */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-2">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="bg-ink-950 p-4 rounded-xl border border-ink-800 flex flex-col gap-2">
+            <div className="flex items-center justify-between border-b border-ink-800 pb-2">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
                 <Building2 className="w-4 h-4 text-amber-400" />
                 Classification: {measurement.roomClassification}
               </div>
-              <span className="text-[10px] font-mono text-slate-500">Tested at {measurement.timestamp}</span>
+              <span className="text-[10px] font-mono text-ink-500">Tested at {measurement.timestamp}</span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed mt-1">
-              <span className="font-semibold text-slate-200">Acoustic Treatment Suggestion:</span> {measurement.recommendation}
+            <p className="text-xs text-ink-300 leading-relaxed mt-1">
+              <span className="font-semibold text-ink-200">Acoustic Treatment Suggestion:</span> {measurement.recommendation}
             </p>
           </div>
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-slate-950/60 rounded-xl border border-slate-850 p-6 text-center flex flex-col items-center justify-center gap-2">
-          <Building2 className="w-8 h-8 text-slate-700 animate-pulse" />
-          <h4 className="text-xs font-bold text-slate-300">Ready to Estimate Room Reverberation</h4>
-          <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+        <div className="bg-ink-950/60 rounded-xl border border-ink-850 p-6 text-center flex flex-col items-center justify-center gap-2">
+          <Building2 className="w-8 h-8 text-ink-700 animate-pulse" />
+          <h4 className="text-xs font-bold text-ink-300">Ready to Estimate Room Reverberation</h4>
+          <p className="text-xs text-ink-400 max-w-sm leading-relaxed">
             Click the button above and make a sharp handclap or balloon pop in your room. The analyzer will calculate your room's RT60 reverb time and offer acoustic treatment tips.
           </p>
         </div>

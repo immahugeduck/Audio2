@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, FileText, Copy, Check, FileCode, Sparkles, X, ExternalLink } from 'lucide-react';
 import { AudioMetrics, NoiseBaselineProfile, AiNoiseDetectionResult } from '../types';
 
@@ -20,6 +20,13 @@ export const ReportExporter: React.FC<ReportExporterProps> = ({
   const [copied, setCopied] = useState(false);
   const [geminiState, setGeminiState] = useState<'idle' | 'copied'>('idle');
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const timestamp = new Date().toLocaleString();
@@ -29,7 +36,7 @@ export const ReportExporter: React.FC<ReportExporterProps> = ({
     return `
 # PROFESSIONAL ACOUSTIC SOUND AUDIT REPORT
 **Generated:** ${timestamp}
-**Application:** Professional Audio Analysis Suite
+**Application:** Auralis Spectrum Studio
 
 ---
 
@@ -94,7 +101,7 @@ ${
 }
 
 ---
-*Report generated automatically by Professional Audio Analysis Suite.*
+*Report generated automatically by Auralis Spectrum Studio.*
 `.trim();
   };
 
@@ -167,10 +174,16 @@ ${reportText}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+    <div
+      className="fixed inset-0 z-[70] bg-ink-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Sound audit report"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-ink-900 border border-ink-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+        <div className="p-5 border-b border-ink-800 flex items-center justify-between bg-ink-950/80">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <FileText className="w-5 h-5" />
@@ -179,7 +192,7 @@ ${reportText}`;
               <h3 className="text-base font-bold text-white tracking-wide">
                 Export Acoustic Sound Audit Report
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-ink-400">
                 Professional diagnostic snapshot, spectral metrics, transient log & AI acoustic consultation
               </p>
             </div>
@@ -187,24 +200,24 @@ ${reportText}`;
           <button
             onClick={onClose}
             id="btn-close-report-modal"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 cursor-pointer transition-all"
+            className="p-2 rounded-xl bg-ink-900 border border-ink-800 text-ink-400 hover:text-white hover:border-ink-700 cursor-pointer transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Gemini Direct Banner */}
-        <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-purple-950/40 border-b border-indigo-500/20 px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
+        <div className="bg-gradient-to-r from-sage-950/40 via-plum-950/40 to-plum-950/40 border-b border-plum-500/20 px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 text-xs">
-            <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 animate-pulse" />
-            <span className="text-slate-300">
+            <Sparkles className="w-4 h-4 text-plum-400 shrink-0 animate-pulse" />
+            <span className="text-ink-300">
               Discuss this report with <strong className="text-white">Google Gemini</strong> for expert acoustic analysis & treatment advice.
             </span>
           </div>
           <button
             onClick={handleAskGemini}
             id="btn-ask-gemini-top"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white flex items-center gap-1.5 cursor-pointer transition-all shadow-md shadow-indigo-600/20"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-sage-600 via-plum-600 to-plum-600 hover:from-sage-500 hover:via-plum-500 hover:to-plum-500 text-white flex items-center gap-1.5 cursor-pointer transition-all shadow-md shadow-plum-600/20"
           >
             {geminiState === 'copied' ? (
               <>
@@ -213,35 +226,35 @@ ${reportText}`;
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
+                <Sparkles className="w-3.5 h-3.5 text-plum-200" />
                 <span>Ask Gemini</span>
-                <ExternalLink className="w-3 h-3 text-indigo-200 opacity-80" />
+                <ExternalLink className="w-3 h-3 text-plum-200 opacity-80" />
               </>
             )}
           </button>
         </div>
 
         {/* Report Preview */}
-        <div className="p-5 overflow-y-auto flex-1 bg-slate-950/90 font-mono text-[11px] text-slate-300 whitespace-pre-wrap leading-relaxed border-b border-slate-800">
+        <div className="p-5 overflow-y-auto flex-1 bg-ink-950/90 font-mono text-[11px] text-ink-300 whitespace-pre-wrap leading-relaxed border-b border-ink-800">
           {reportText}
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 bg-slate-950 flex items-center justify-between gap-3 flex-wrap">
+        <div className="p-4 bg-ink-950 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
               id="btn-copy-report"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 flex items-center gap-2 cursor-pointer transition-all"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-ink-900 border border-ink-800 hover:border-ink-700 text-ink-200 flex items-center gap-2 cursor-pointer transition-all"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-ink-400" />}
               {copied ? 'Copied Text!' : 'Copy Report'}
             </button>
 
             <button
               onClick={handleAskGemini}
               id="btn-ask-gemini-bottom"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white flex items-center gap-2 cursor-pointer transition-all shadow-lg shadow-indigo-500/20"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-sage-600 via-plum-600 to-plum-600 hover:from-sage-500 hover:via-plum-500 hover:to-plum-500 text-white flex items-center gap-2 cursor-pointer transition-all shadow-lg shadow-plum-500/20"
             >
               {geminiState === 'copied' ? (
                 <>
@@ -250,9 +263,9 @@ ${reportText}`;
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-indigo-200" />
+                  <Sparkles className="w-4 h-4 text-plum-200" />
                   <span>Ask Gemini (gemini.google.com)</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-indigo-200 opacity-80" />
+                  <ExternalLink className="w-3.5 h-3.5 text-plum-200 opacity-80" />
                 </>
               )}
             </button>
@@ -262,18 +275,18 @@ ${reportText}`;
             <button
               onClick={downloadJson}
               id="btn-download-report-json"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 hover:border-slate-700 text-cyan-300 flex items-center gap-2 cursor-pointer transition-all"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-ink-900 border border-ink-800 hover:border-ink-700 text-accent-300 flex items-center gap-2 cursor-pointer transition-all"
             >
-              <FileCode className="w-4 h-4 text-cyan-400" />
+              <FileCode className="w-4 h-4 text-accent-400" />
               JSON
             </button>
 
             <button
               onClick={downloadMarkdown}
               id="btn-download-report-md"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-slate-950 flex items-center gap-2 cursor-pointer transition-all shadow-lg shadow-emerald-500/20"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-accent-600 hover:from-emerald-400 hover:to-accent-500 text-ink-950 flex items-center gap-2 cursor-pointer transition-all shadow-lg shadow-emerald-500/20"
             >
-              <Download className="w-4 h-4 text-slate-950" />
+              <Download className="w-4 h-4 text-ink-950" />
               Download Markdown (.md)
             </button>
           </div>

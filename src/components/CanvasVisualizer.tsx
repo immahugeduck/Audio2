@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { VisualizerSettings, AudioMetrics } from '../types';
-import { COLOR_PRESETS, getPresetById, createCanvasGradient, getPeakColor } from '../utils/colorGradients';
+import { getPresetById, createCanvasGradient, getPeakColor, resolveStops, samplePalette, parseHex } from '../utils/colorGradients';
 import { 
   Maximize2, 
   Minimize2, 
@@ -14,8 +14,6 @@ import {
   Eye, 
   EyeOff, 
   X,
-  Activity,
-  Zap
 } from 'lucide-react';
 
 interface SpectrumLayer {
@@ -48,12 +46,36 @@ const blendHexColors = (color1: string, color2: string, ratio: number): string =
 };
 
 const LAYER_COLORS = [
-  '#06b6d4', // Cyan
-  '#10b981', // Emerald
-  '#f59e0b', // Amber
-  '#ec4899', // Pink
-  '#8b5cf6', // Purple
-  '#f97316', // Orange
+  '#8fd0a4', // Sage
+  '#b48ac8', // Plum
+  '#6f9fd1', // Glacier
+  '#e58aa8', // Rose
+  '#f2b04a', // Gold
+  '#ef6f5e', // Coral
+];
+
+const CANVAS_BG = '#0b0a0d';
+function rgbToHex(rgb: string): string {
+  const m = rgb.match(/\d+/g) || ['0', '0', '0'];
+  return '#' + m.slice(0, 3).map((n) => Number(n).toString(16).padStart(2, '0')).join('');
+}
+const FONT_MONO = "11px 'IBM Plex Mono', ui-monospace, monospace";
+const rgba = (hex: string, a: number) => {
+  const [r, g, b] = parseHex(hex);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
+// Typical audible-range tick labels (Hz) used for the frequency axis
+const HZ_TICKS: { hz: number; label: string }[] = [
+  { hz: 50, label: '50' },
+  { hz: 100, label: '100' },
+  { hz: 250, label: '250' },
+  { hz: 500, label: '500' },
+  { hz: 1000, label: '1k' },
+  { hz: 2000, label: '2k' },
+  { hz: 4000, label: '4k' },
+  { hz: 8000, label: '8k' },
+  { hz: 16000, label: '16k' },
 ];
 
 interface CanvasVisualizerProps {
@@ -62,6 +84,13 @@ interface CanvasVisualizerProps {
   getTimeDomainData: () => Uint8Array;
   metrics: AudioMetrics;
   isPlaying: boolean;
+  /** hero = tall stage with toolbar, compact = short preview strip */
+  variant?: 'hero' | 'compact';
+  /** Effective analyser dB window (differs from settings while auto-range is on) */
+  rangeRef?: React.MutableRefObject<{ min: number; max: number }>;
+  /** Rendered over the graph while nothing is playing (call-to-action / empty state) */
+  overlay?: React.ReactNode;
+  sampleRate?: number;
 }
 
 export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
@@ -70,8 +99,17 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
   getTimeDomainData,
   metrics,
   isPlaying,
+  variant = 'hero',
+  rangeRef,
+  overlay,
+  sampleRate = 44100,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const sampleRateRef = useRef(sampleRate);
+  sampleRateRef.current = sampleRate;
+  const radialPeaksRef = useRef<number[]>([]);
+  const spectroLutRef = useRef<{ key: string; lut: Uint8ClampedArray } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Offscreen canvas for Spectrogram Waterfall scrolling
@@ -116,6 +154,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
   settingsRef.current = settings;
   const metricsRef = useRef(metrics);
   metricsRef.current = metrics;
+  const rangeRefLocal = useRef(rangeRef);
+  rangeRefLocal.current = rangeRef;
   const isPlayingRef = useRef(isPlaying);
   isPlayingRef.current = isPlaying;
   const savedLayersRef = useRef(savedLayers);
@@ -221,7 +261,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
   useEffect(() => {
     let animationFrameId: number;
     const canvas = canvasRef.current;
-    const container = containerRef.current;
+    const container = canvasWrapRef.current;
     if (!canvas || !container) return;
 
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -263,7 +303,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       ctx.scale(dpr, dpr);
 
       // Deep studio dark background (matches the app's near-black base)
-      ctx.fillStyle = '#070a14';
+      ctx.fillStyle = CANVAS_BG;
       ctx.fillRect(0, 0, width, height);
 
       // Fetch raw data
@@ -296,8 +336,22 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         containerRef.current.style.boxShadow = '';
       }
 
-      const preset = getPresetById(settings.colorPresetId);
+      const basePreset = getPresetById(settings.colorPresetId);
+      const stops = resolveStops(basePreset, settings.customGradient, settings.useCustomGradient);
+      // Effective palette: custom stops override the preset everywhere (all modes)
+      const preset = settings.useCustomGradient
+        ? { ...basePreset, colors: [...stops], peakColor: settings.customGradient.peak, glowColor: rgba(stops[1], 0.4) }
+        : basePreset;
       const peakColor = getPeakColor(preset, settings.customGradient, settings.useCustomGradient);
+
+      // Beat envelope (only drives visuals when "beat pulse" is enabled)
+      beatScaleRef.current *= 0.9;
+      const beat = settings.beatPulseAnimation ? beatScaleRef.current : 0;
+      const winRange = rangeRefLocal.current?.current;
+      const dbMin = winRange ? winRange.min : settings.minDecibels;
+      const dbMax = winRange ? winRange.max : settings.maxDecibels;
+      const nyquist = sampleRateRef.current / 2;
+      const showAxis = settings.mode === 'bars' || settings.mode === 'curve' || settings.mode === 'hybrid' || settings.mode === 'spectrogram';
 
       // Smooth & subtle background reactive ambient glow (toned down)
       if (settings.reactiveColors && metrics.bass > 40) {
@@ -311,8 +365,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           glowRadius
         );
         const glowOpacity = Math.min(0.12, (metrics.bass / 1000)).toFixed(2);
-        radialGlow.addColorStop(0, `rgba(6, 182, 212, ${glowOpacity})`);
-        radialGlow.addColorStop(1, 'rgba(7, 10, 20, 0)');
+        radialGlow.addColorStop(0, rgba(stops[1], Number(glowOpacity)));
+        radialGlow.addColorStop(1, 'rgba(11, 10, 13, 0)');
         ctx.fillStyle = radialGlow;
         ctx.fillRect(0, 0, width, height);
       }
@@ -385,7 +439,9 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       // -------------------------------------------------------------
       if (settings.mode === 'bars') {
         const numBars = Math.min(binCount, Math.floor(width / (settings.barSpacing + 3)));
-        const barWidth = Math.max(2, (width / numBars) - settings.barSpacing);
+        // slot = horizontal space per bar; bar width scales inside the slot
+        const slot = width / numBars;
+        const barWidth = Math.max(1.5, Math.min(slot, (slot - settings.barSpacing) * settings.barWidthMultiplier));
 
         // Ensure peak values array length matches numBars
         if (peakValuesRef.current.length !== numBars) {
@@ -406,10 +462,10 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           }
 
           const rawValue = freqData[dataIndex] || 0;
-          const normalized = (rawValue / 255) * settings.sensitivity;
-          const barHeight = Math.max(3, normalized * (height * 0.78));
+          const normalized = Math.min(1, (rawValue / 255) * settings.sensitivity);
+          const barHeight = Math.max(3, normalized * (height * 0.78) * (1 + 0.07 * beat));
 
-          const x = i * (barWidth + settings.barSpacing) + (width - numBars * (barWidth + settings.barSpacing)) / 2;
+          const x = i * slot + (slot - barWidth) / 2;
           const y = height - barHeight - 35; // Leave space for bottom scale
 
           // Draw Bar
@@ -478,8 +534,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           }
 
           const rawValue = freqData[dataIndex] || 0;
-          const normalized = (rawValue / 255) * settings.sensitivity;
-          const h = normalized * (height * 0.75);
+          const normalized = Math.min(1, (rawValue / 255) * settings.sensitivity);
+          const h = normalized * (height * 0.75) * (1 + 0.07 * beat);
 
           // Update peak values (sustained-tone hold refresh, matching bars mode)
           if (h > curvePeakValuesRef.current[i]) {
@@ -598,6 +654,86 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       }
 
       // -------------------------------------------------------------
+      // RADIAL SPECTRUM MODE (mirrored, centered ring)
+      // -------------------------------------------------------------
+      else if (settings.mode === 'radial') {
+        const cx = width / 2;
+        const cy = height / 2 - 4;
+        const minSide = Math.min(width, height);
+        const baseR = minSide * 0.19 * (1 + 0.1 * beat);
+        const maxLen = minSide * 0.27;
+        const spokes = Math.max(48, Math.min(160, Math.floor(minSide / 3.2)));
+        const half = spokes / 2;
+
+        if (radialPeaksRef.current.length !== spokes) radialPeaksRef.current = new Array(spokes).fill(0);
+
+        // Soft core glow
+        const core = ctx.createRadialGradient(cx, cy, baseR * 0.2, cx, cy, baseR * 1.35);
+        core.addColorStop(0, rgba(stops[1], 0.16 + 0.2 * beat));
+        core.addColorStop(1, 'rgba(11, 10, 13, 0)');
+        ctx.fillStyle = core;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.lineCap = 'round';
+        const lineW = Math.max(1.6, (Math.PI * 2 * baseR) / spokes * 0.55 * settings.barWidthMultiplier - settings.barSpacing * 0.15);
+        for (let i = 0; i < spokes; i++) {
+          // mirror left/right so the ring is symmetrical (low freqs at the top)
+          const u = i < half ? i / half : (spokes - i) / half;
+          let dataIndex: number;
+          if (settings.logScale) {
+            dataIndex = Math.min(binCount - 1, Math.floor(Math.pow(u, 2.2) * binCount));
+          } else {
+            dataIndex = Math.floor(u * (binCount * 0.7));
+          }
+          const norm = Math.min(1, ((freqData[dataIndex] || 0) / 255) * settings.sensitivity);
+          const len = Math.max(2, norm * maxLen);
+          const ang = -Math.PI / 2 + (i / spokes) * Math.PI * 2;
+          const cos = Math.cos(ang);
+          const sin = Math.sin(ang);
+
+          ctx.strokeStyle = samplePalette(stops, norm);
+          ctx.lineWidth = lineW;
+          ctx.beginPath();
+          ctx.moveTo(cx + cos * baseR, cy + sin * baseR);
+          ctx.lineTo(cx + cos * (baseR + len), cy + sin * (baseR + len));
+          ctx.stroke();
+
+          if (settings.showPeaks) {
+            if (len > radialPeaksRef.current[i]) radialPeaksRef.current[i] = len;
+            else radialPeaksRef.current[i] = Math.max(0, radialPeaksRef.current[i] - (infinitePeakHold ? 0 : 0.8));
+            const pr = baseR + radialPeaksRef.current[i] + 4;
+            if (radialPeaksRef.current[i] > 3) {
+              ctx.fillStyle = peakColor;
+              ctx.beginPath();
+              ctx.arc(cx + cos * pr, cy + sin * pr, Math.max(1.1, lineW * 0.5), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+
+        // Ring + readout
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = rgba(stops[2], 0.55);
+        ctx.shadowColor = preset.glowColor;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(cx, cy, baseR - 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const hasTone = metrics.peakFrequencyHz > 16;
+        ctx.fillStyle = hasTone ? '#f7f5f8' : 'rgba(143, 138, 155, 0.8)';
+        ctx.font = `600 ${Math.round(Math.max(13, baseR * 0.3))}px 'IBM Plex Mono', ui-monospace, monospace`;
+        ctx.fillText(hasTone ? metrics.peakFrequencyFormatted : '— Hz', cx, cy - baseR * 0.1);
+        ctx.fillStyle = rgba(stops[2], hasTone ? 0.95 : 0.4);
+        ctx.font = `500 ${Math.round(Math.max(11, baseR * 0.19))}px 'IBM Plex Mono', ui-monospace, monospace`;
+        ctx.fillText(hasTone ? metrics.peakNoteName : 'no tone', cx, cy + baseR * 0.26);
+        ctx.textBaseline = 'alphabetic';
+      }
+
+      // -------------------------------------------------------------
       // 3D WATERFALL & SPECTROGRAM RAINFALL MODE
       // -------------------------------------------------------------
       else if (settings.mode === 'waterfall') {
@@ -640,7 +776,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
             }
 
             const rawVal = frameData[dataIndex] || 0;
-            const normalized = (rawVal / 255) * settings.sensitivity;
+            const normalized = Math.min(1.2, (rawVal / 255) * settings.sensitivity);
             const barH = normalized * (120 * scale); // 3D mountain peak height displacement
 
             const px = startX + (i / (numBins - 1 || 1)) * frameWidth;
@@ -648,7 +784,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
 
             // Compute vertex color based on amplitude value
             const valNorm = Math.min(1.0, normalized);
-            let vertexColor = '#00f0ff';
+            let vertexColor = '#f2b04a';
             if (preset.colors.length >= 3) {
               if (valNorm < 0.4) {
                 vertexColor = blendHexColors(preset.colors[0], preset.colors[1], valNorm / 0.4);
@@ -658,7 +794,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
             } else if (preset.colors.length === 2) {
               vertexColor = blendHexColors(preset.colors[0], preset.colors[1], valNorm);
             } else {
-              vertexColor = preset.colors[0] || '#00f0ff';
+              vertexColor = preset.colors[0] || '#f2b04a';
             }
 
             frameRow.push({ x: px, y: py, val: rawVal, color: vertexColor });
@@ -689,7 +825,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
 
           // Smooth depth fog to occlude background shapes completely
           const alphaFog = Math.min(0.98, 0.76 + depthVal * 0.22);
-          ctx.fillStyle = `rgba(7, 10, 20, ${alphaFog})`;
+          ctx.fillStyle = `rgba(11, 10, 13, ${alphaFog})`;
           ctx.fill();
 
           // 2. Draw Longitudinal Grid Lines (Z-axis connectors/ribbons) connecting back-to-front
@@ -703,7 +839,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
             }
             ctx.lineWidth = Math.max(0.5, 0.8 * scale);
             // Dynamic grid connectors opacity
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.08 + depthVal * 0.22})`;
+            ctx.strokeStyle = `rgba(214, 210, 220, ${0.05 + depthVal * 0.16})`;
             ctx.stroke();
           }
 
@@ -758,39 +894,31 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
             // Scroll existing image down by 2 pixels
             sCtx.drawImage(sCanvas, 0, 0, width, height, 0, 2, width, height);
 
-            // Render new line at top (y=0)
-            const numBins = Math.min(binCount, width);
-            for (let x = 0; x < width; x++) {
-              const binIdx = Math.floor((x / width) * (binCount * 0.7));
-              const intensity = freqData[binIdx] || 0;
-
-              // Enhanced Thermal / Plasma Color Mapping for Spectrogram Noise Floor Tracking
-              let r = 0, g = 0, b = 0;
-              const normalized = Math.min(1.0, (intensity / 255) * settings.sensitivity);
-
-              if (normalized < 0.1) {
-                // Noise Floor / Silence: Deep Navy / Charcoal
-                r = Math.floor(9 + normalized * 100);
-                g = Math.floor(13 + normalized * 100);
-                b = Math.floor(22 + normalized * 300);
-              } else if (normalized < 0.4) {
-                // Low level ambient: Cyan / Teal
-                r = Math.floor((normalized - 0.1) * 3 * 30);
-                g = Math.floor(100 + (normalized - 0.1) * 3 * 155);
-                b = 210;
-              } else if (normalized < 0.75) {
-                // Mid level sound: Bright Yellow / Gold
-                r = 255;
-                g = Math.floor(160 + (normalized - 0.4) * 2.8 * 95);
-                b = Math.floor(30 + (normalized - 0.4) * 2.8 * 80);
-              } else {
-                // High transient spike: Intense Magenta / Hot Pink
-                r = 255;
-                g = Math.floor(255 - (normalized - 0.75) * 4 * 180);
-                b = Math.floor(200 + (normalized - 0.75) * 4 * 55);
+            // Render new line at top (y=0), colored from the active palette
+            const lutKey = stops.join('|');
+            if (!spectroLutRef.current || spectroLutRef.current.key !== lutKey) {
+              const lut = new Uint8ClampedArray(256 * 3);
+              const bgc = parseHex(CANVAS_BG);
+              for (let v = 0; v < 256; v++) {
+                const t = v / 255;
+                // fade in from the background so the noise floor stays dark
+                const col = parseHex(rgbToHex(samplePalette(stops, t)));
+                const k = Math.min(1, t / 0.18);
+                lut[v * 3] = bgc[0] + (col[0] - bgc[0]) * k;
+                lut[v * 3 + 1] = bgc[1] + (col[1] - bgc[1]) * k;
+                lut[v * 3 + 2] = bgc[2] + (col[2] - bgc[2]) * k;
               }
-
-              sCtx.fillStyle = `rgb(${r},${g},${b})`;
+              spectroLutRef.current = { key: lutKey, lut };
+            }
+            const lut = spectroLutRef.current.lut;
+            for (let x = 0; x < width; x++) {
+              const f = x / width;
+              const binIdx = settings.logScale
+                ? Math.min(binCount - 1, Math.floor(Math.pow(f, 2) * binCount))
+                : Math.floor(f * (binCount * 0.75));
+              const intensity = freqData[binIdx] || 0;
+              const v = Math.min(255, Math.round(intensity * settings.sensitivity));
+              sCtx.fillStyle = `rgb(${lut[v * 3]},${lut[v * 3 + 1]},${lut[v * 3 + 2]})`;
               sCtx.fillRect(x, 0, 1, 2);
             }
             ctx.drawImage(sCanvas, 0, 0);
@@ -819,7 +947,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         }
 
         ctx.lineTo(width, height / 2 - 15);
-        ctx.strokeStyle = preset.colors[0] || '#00f0ff';
+        ctx.strokeStyle = preset.colors[2] || preset.colors[0] || '#f2b04a';
         ctx.lineWidth = 2.5;
         ctx.shadowColor = preset.glowColor;
         ctx.shadowBlur = 12;
@@ -835,8 +963,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         const miniY = 25;
 
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+        ctx.fillStyle = 'rgba(19, 18, 23, 0.72)';
+        ctx.strokeStyle = 'rgba(74, 70, 85, 0.5)';
         ctx.roundRect(15, miniY, width - 30, miniHeight, 6);
         ctx.fill();
         ctx.stroke();
@@ -857,7 +985,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           x += sliceWidth;
         }
 
-        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeStyle = preset.colors[2] || '#f8cf85';
         ctx.lineWidth = 1.5;
         ctx.stroke();
         ctx.restore();
@@ -866,55 +994,65 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
       // -------------------------------------------------------------
       // OVERLAYS: Hz FREQUENCY SCALE & dB GRID
       // -------------------------------------------------------------
-      if (settings.showHzScale) {
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-        ctx.font = '11px monospace';
+      // Beat pulse wash (behind nothing — a subtle full-frame flash)
+      if (beat > 0.02) {
+        const wash = ctx.createRadialGradient(width / 2, height, 0, width / 2, height, Math.max(width, height) * 0.8);
+        wash.addColorStop(0, rgba(stops[1], 0.16 * beat));
+        wash.addColorStop(1, 'rgba(11, 10, 13, 0)');
+        ctx.fillStyle = wash;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      if (settings.showHzScale && showAxis) {
+        ctx.fillStyle = 'rgba(143, 138, 155, 0.85)';
+        ctx.font = FONT_MONO;
         ctx.textAlign = 'center';
+        ctx.strokeStyle = 'rgba(74, 70, 85, 0.7)';
+        ctx.lineWidth = 1;
 
-        const hzLabels = [
-          { hz: '20Hz', ratio: 0.02 },
-          { hz: '60Hz', ratio: 0.08 },
-          { hz: '250Hz', ratio: 0.22 },
-          { hz: '500Hz', ratio: 0.35 },
-          { hz: '1kHz', ratio: 0.5 },
-          { hz: '2.5kHz', ratio: 0.65 },
-          { hz: '5kHz', ratio: 0.78 },
-          { hz: '10kHz', ratio: 0.88 },
-          { hz: '20kHz', ratio: 0.98 },
-        ];
-
-        // Bottom axis border line
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
         ctx.beginPath();
         ctx.moveTo(0, height - 32);
         ctx.lineTo(width, height - 32);
         ctx.stroke();
 
-        hzLabels.forEach((label) => {
-          const labelX = label.ratio * width;
-          ctx.fillText(label.hz, labelX, height - 12);
-
-          // Tick line
+        // Tick positions follow the active frequency mapping of each mode
+        HZ_TICKS.forEach((tick) => {
+          if (tick.hz >= nyquist) return;
+          const fraction = tick.hz / nyquist; // 0..1 of full bin range
+          let ratio: number;
+          if (settings.mode === 'bars') {
+            ratio = settings.logScale ? Math.sqrt(fraction) : fraction / 0.75;
+          } else if (settings.mode === 'spectrogram') {
+            ratio = settings.logScale ? Math.sqrt(fraction) : fraction / 0.75;
+          } else {
+            ratio = settings.logScale ? Math.pow(fraction, 1 / 2.2) : fraction / 0.7;
+          }
+          if (ratio <= 0.01 || ratio >= 0.985) return;
+          const labelX = ratio * width;
+          ctx.fillText(tick.label, labelX, height - 12);
           ctx.beginPath();
           ctx.moveTo(labelX, height - 32);
-          ctx.lineTo(labelX, height - 26);
+          ctx.lineTo(labelX, height - 27);
           ctx.stroke();
         });
+        ctx.textAlign = 'left';
+        ctx.fillText('Hz', 8, height - 12);
       }
 
-      if (settings.showDbGrid) {
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
-        ctx.font = '10px monospace';
+      if (settings.showDbGrid && (settings.mode === 'bars' || settings.mode === 'curve' || settings.mode === 'hybrid')) {
+        ctx.fillStyle = 'rgba(143, 138, 155, 0.6)';
+        ctx.font = "10px 'IBM Plex Mono', ui-monospace, monospace";
         ctx.textAlign = 'left';
 
-        const dbSteps = [-6, -12, -24, -36, -48, -60];
+        const span = dbMax - dbMin;
+        const dbSteps = [-6, -12, -24, -36, -48, -60, -72, -84];
         dbSteps.forEach((db) => {
-          const norm = (db - settings.minDecibels) / (settings.maxDecibels - settings.minDecibels);
-          const lineY = height - 35 - norm * (height * 0.75);
+          const norm = (db - dbMin) / span;
+          const lineY = height - 35 - norm * settings.sensitivity * (height * (settings.mode === 'bars' ? 0.78 : 0.75));
 
-          if (lineY > 20 && lineY < height - 40) {
-            ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
-            ctx.setLineDash([4, 4]);
+          if (norm > 0.04 && lineY > 20 && lineY < height - 40) {
+            ctx.strokeStyle = 'rgba(143, 138, 155, 0.16)';
+            ctx.setLineDash([4, 5]);
             ctx.beginPath();
             ctx.moveTo(0, lineY);
             ctx.lineTo(width, lineY);
@@ -942,27 +1080,33 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
     // This mounts the canvas render loop + ResizeObserver exactly once.
   }, [getFrequencyData, getTimeDomainData]);
 
+  const isHero = variant === 'hero';
+
   return (
     <div
       ref={containerRef}
       id="spectrum-canvas-container"
-      className="relative w-full h-[440px] md:h-[560px] bg-slate-950 rounded-2xl overflow-hidden flex flex-col group"
+      className={`relative w-full bg-ink-950 rounded-2xl overflow-hidden flex flex-col group ${
+        isHero ? 'h-[min(56vh,540px)] min-h-[360px]' : 'h-[220px] sm:h-[280px]'
+      }`}
     >
-      {/* Top Bar Floating Controls on Canvas */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-10 pointer-events-auto">
+      {/* Floating canvas tools */}
+      <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 pointer-events-auto opacity-80 group-hover:opacity-100 transition-opacity">
         <button
           onClick={exportSnapshot}
-          title="Export PNG Snapshot"
+          title="Export PNG snapshot"
+          aria-label="Export PNG snapshot"
           id="btn-export-snapshot"
-          className="p-2 bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md text-slate-300 hover:text-white rounded-xl border border-slate-700/60 transition-all active:scale-95 shadow-md cursor-pointer"
+          className="p-2 bg-ink-900/70 hover:bg-ink-800 backdrop-blur-md text-ink-300 hover:text-white rounded-xl border border-ink-700/60 transition-all active:scale-95 cursor-pointer"
         >
           <Camera className="w-4 h-4" />
         </button>
         <button
           onClick={toggleFullscreen}
-          title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Display'}
+          title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen display'}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen display'}
           id="btn-toggle-fullscreen"
-          className="p-2 bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md text-slate-300 hover:text-white rounded-xl border border-slate-700/60 transition-all active:scale-95 shadow-md cursor-pointer"
+          className="p-2 bg-ink-900/70 hover:bg-ink-800 backdrop-blur-md text-ink-300 hover:text-white rounded-xl border border-ink-700/60 transition-all active:scale-95 cursor-pointer"
         >
           {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
         </button>
@@ -970,27 +1114,32 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
 
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2 border border-cyan-400/30">
-          <Sparkles className="w-3.5 h-3.5 animate-pulse" /> {toastMessage}
+        <div role="status" className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-accent-400 text-ink-950 px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5" /> {toastMessage}
         </div>
       )}
 
       {/* HTML5 Canvas */}
-      <div className="flex-1 w-full min-h-0 relative">
-        <canvas ref={canvasRef} className="w-full h-full block cursor-crosshair" />
+      <div ref={canvasWrapRef} className="flex-1 w-full min-h-0 relative">
+        <canvas ref={canvasRef} className="w-full h-full block cursor-crosshair" aria-label="Live audio spectrum" role="img" />
+        {!isPlaying && overlay && (
+          <div className="absolute inset-0 flex items-center justify-center p-4 bg-ink-950/55 backdrop-blur-[2px] z-10">
+            {overlay}
+          </div>
+        )}
       </div>
 
       {/* Collapsible Layers Manager Drawer */}
       {showLayersManager && savedLayers.length > 0 && (
-        <div className="bg-slate-950/95 border-t border-slate-800/85 p-3 max-h-[160px] overflow-y-auto z-10 backdrop-blur-md">
-          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-800/60">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="bg-ink-950/95 border-t border-ink-800/85 p-3 max-h-[160px] overflow-y-auto z-10 backdrop-blur-md">
+          <div className="flex items-center justify-between mb-2 pb-1 border-b border-ink-800/60">
+            <h4 className="text-[11px] font-bold text-ink-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-accent-400" />
               Active Spectrum Overlays & Comparators
             </h4>
             <button
               onClick={() => setShowLayersManager(false)}
-              className="p-1 text-slate-500 hover:text-slate-300 hover:bg-slate-900 rounded-md transition-all cursor-pointer"
+              className="p-1 text-ink-500 hover:text-ink-300 hover:bg-ink-900 rounded-md transition-all cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -998,7 +1147,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
 
           <div className="flex flex-col gap-2">
             {savedLayers.map((layer) => (
-              <div key={layer.id} className="flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/50 p-2 rounded-lg text-xs">
+              <div key={layer.id} className="flex items-center justify-between gap-3 bg-ink-900/60 border border-ink-800/50 p-2 rounded-lg text-xs">
                 {/* Name & input to edit */}
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: layer.color }} />
@@ -1006,15 +1155,15 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
                     type="text"
                     value={layer.name}
                     onChange={(e) => renameLayer(layer.id, e.target.value)}
-                    className="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-cyan-500 focus:outline-none text-slate-200 font-medium px-1 py-0.5 rounded transition-all w-full max-w-[150px] sm:max-w-xs truncate"
+                    className="bg-transparent border-b border-transparent hover:border-ink-700 focus:border-accent-500 focus:outline-none text-ink-200 font-medium px-1 py-0.5 rounded transition-all w-full max-w-[150px] sm:max-w-xs truncate"
                   />
-                  <span className="text-[10px] text-slate-500 hidden sm:inline shrink-0">{layer.timestamp}</span>
+                  <span className="text-[10px] text-ink-500 hidden sm:inline shrink-0">{layer.timestamp}</span>
                 </div>
 
                 {/* Controls (Visibility, Color change, Delete) */}
                 <div className="flex items-center gap-2 shrink-0">
                   {/* Quick Color Selector */}
-                  <div className="flex items-center gap-1 bg-slate-950/50 p-1 rounded-md border border-slate-800/40">
+                  <div className="flex items-center gap-1 bg-ink-950/50 p-1 rounded-md border border-ink-800/40">
                     {LAYER_COLORS.map((color) => (
                       <button
                         key={color}
@@ -1030,10 +1179,10 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
                   {/* Toggle Visibility */}
                   <button
                     onClick={() => toggleLayerVisibility(layer.id)}
-                    className={`p-1 rounded-md hover:bg-slate-800 border transition-all cursor-pointer ${
+                    className={`p-1 rounded-md hover:bg-ink-800 border transition-all cursor-pointer ${
                       layer.visible
-                        ? 'border-slate-850 text-slate-200'
-                        : 'border-slate-850/40 text-slate-600 hover:text-slate-400'
+                        ? 'border-ink-850 text-ink-200'
+                        : 'border-ink-850/40 text-ink-500 hover:text-ink-400'
                     }`}
                     title={layer.visible ? 'Hide overlay' : 'Show overlay'}
                   >
@@ -1043,7 +1192,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
                   {/* Delete */}
                   <button
                     onClick={() => deleteLayer(layer.id)}
-                    className="p-1 rounded-md hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 text-slate-500 hover:text-rose-400 transition-all cursor-pointer"
+                    className="p-1 rounded-md hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 text-ink-500 hover:text-rose-400 transition-all cursor-pointer"
                     title="Delete reference layer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -1055,18 +1204,19 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         </div>
       )}
 
-      {/* Bottom Dashboard Bar for High-Precision Analyzers */}
-      <div className="bg-slate-900/95 border-t border-slate-800/80 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-slate-300">
+      {/* Bottom toolbar: peak hold + reference layers (hero only) */}
+      {isHero && (
+      <div className="bg-ink-900/95 border-t border-ink-800/80 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-ink-300">
         {/* Left side: Peak Hold Controls */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Peak Hold:</span>
+          <span className="text-[10px] font-bold text-ink-500 uppercase tracking-wider">Peak Hold:</span>
           <button
             onClick={() => setInfinitePeakHold(!infinitePeakHold)}
             id="btn-toggle-infinite-peak"
             className={`px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 font-semibold transition-all cursor-pointer ${
               infinitePeakHold
                 ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 font-bold'
-                : 'bg-slate-950 border-slate-800 hover:bg-slate-850 text-slate-400 hover:text-slate-200'
+                : 'bg-ink-950 border-ink-800 hover:bg-ink-850 text-ink-400 hover:text-ink-200'
             }`}
             title="Toggle infinite peak hold (locks peak lines at maximum values)"
           >
@@ -1077,10 +1227,10 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           <button
             onClick={resetPeaks}
             id="btn-reset-peaks"
-            className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:bg-slate-850 hover:border-slate-700 text-slate-300 font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+            className="px-2.5 py-1.5 rounded-lg bg-ink-950 border border-ink-800 hover:bg-ink-850 hover:border-ink-700 text-ink-300 font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             title="Reset current peak levels to zero"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+            <RefreshCw className="w-3.5 h-3.5 text-ink-400" />
             Reset Peaks
           </button>
         </div>
@@ -1088,12 +1238,12 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
         {/* Right side: Layering system */}
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Layers:</span>
+            <span className="text-[10px] font-bold text-ink-500 uppercase tracking-wider">Layers:</span>
             <button
               onClick={captureCurrentLayer}
               disabled={!isPlaying && metrics.peakFrequencyHz === 0}
               id="btn-capture-layer"
-              className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 hover:border-cyan-500/50 text-cyan-300 font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-accent-500/10 to-emerald-500/10 hover:from-accent-500/20 hover:to-emerald-500/20 border border-accent-500/30 hover:border-accent-500/50 text-accent-300 font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               title="Capture current frequency spectrum envelope as a comparative overlay"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -1107,8 +1257,8 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
               id="btn-toggle-layers-manager"
               className={`px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 font-semibold transition-all cursor-pointer ${
                 showLayersManager
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
-                  : 'bg-slate-950 border-slate-800 hover:bg-slate-850 text-slate-400 hover:text-slate-200'
+                  ? 'bg-accent-500/15 border-accent-500/40 text-accent-300'
+                  : 'bg-ink-950 border-ink-800 hover:bg-ink-850 text-ink-400 hover:text-ink-200'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -1117,6 +1267,7 @@ export const CanvasVisualizer: React.FC<CanvasVisualizerProps> = ({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 };

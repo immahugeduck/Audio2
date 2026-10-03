@@ -1,6 +1,6 @@
 {
-  "name": "Audio2une",
-  "description": "Audio2une — a premium real-time audio spectrum analyzer built with React and the Web Audio API. Features multiple live graph modes (bars, spectral contour, 3D waterfall, heatmap, oscilloscope, dual scope), real-time level & spectral metering, mic and file/URL input, AI noise classification, and customizable neon color gradients.",
+  "name": "Auralis",
+  "description": "Auralis — a real-time audio spectrum studio built with React and the Web Audio API. Live mic, file and URL analysis; bars, curve, hybrid, radial, waterfall, spectrogram and scope graphs; EQ, tuner, noise and room tools; AI sound classification; fully customizable color, input and gain settings.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

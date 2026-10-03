@@ -1,9 +1,41 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { AudioEngineState, AudioMetrics, VisualizerSettings } from '../types';
+import { AudioEngineState, AudioMetrics, VisualizerSettings, InputSettings, GainSettings, MicTrackInfo } from '../types';
 import { SAMPLE_TRACKS, generateSampleAudioBuffer, calculateAudioMetrics, formatFrequency, frequencyToNote } from '../utils/audioPresets';
 import { PeakFrequencyTracker, sampleNeighborhoodMagnitude } from '../utils/peakFrequencyTracker';
 
-export function useAudioEngine(settings: VisualizerSettings) {
+export interface AudioEngineOptions {
+  input: InputSettings;
+  gain: GainSettings;
+}
+
+const dbToLinear = (db: number) => Math.pow(10, db / 20);
+
+/** Set the analyser dB window safely (the setters throw while min >= max mid-update). */
+function setAnalyserRange(an: AnalyserNode, min: number, max: number) {
+  try {
+    an.minDecibels = min;
+    an.maxDecibels = max;
+  } catch {
+    try {
+      an.maxDecibels = max;
+      an.minDecibels = min;
+    } catch {
+      /* ignore invalid window */
+    }
+  }
+}
+
+/** Speaker level for the current state: mic is silent unless monitoring (feedback guard). */
+function computeOutputGain(st: Pick<AudioEngineState, 'sourceType' | 'micMonitoring' | 'isMuted' | 'volume'>): number {
+  if (st.isMuted) return 0;
+  if (st.sourceType === 'mic' && !st.micMonitoring) return 0;
+  return st.volume;
+}
+
+export function useAudioEngine(settings: VisualizerSettings, options: AudioEngineOptions) {
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   // Audio state
   const [engineState, setEngineState] = useState<AudioEngineState>({
     sourceType: 'sample',
@@ -11,7 +43,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
     isPaused: false,
     duration: 30,
     currentTime: 0,
-    volume: 0.8,
+    volume: options.gain.outputVolume,
     isMuted: false,
     bassGain: 0,
     midGain: 0,
@@ -22,12 +54,13 @@ export function useAudioEngine(settings: VisualizerSettings) {
     activeSampleId: 'synthwave',
     micActive: false,
     micError: null,
-    micMonitoring: false, // Default false: analyze mic audio without replaying to speakers
+    micMonitoring: options.input.monitoring, // Default false: analyze mic audio without replaying to speakers
     audioInputDevices: [],
-    selectedDeviceId: null,
+    selectedDeviceId: options.input.deviceId,
     isBluetoothConnected: false,
     bluetoothDeviceName: null,
     phoneMicDeviceName: null,
+    micInfo: null,
   });
 
   const [loadedFile, setLoadedFile] = useState<File | null>(null);
@@ -60,6 +93,11 @@ export function useAudioEngine(settings: VisualizerSettings) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
+  const inputGainRef = useRef<GainNode | null>(null);
+  // Effective analyser dB window (differs from settings while auto-range is on)
+  const rangeRef = useRef({ min: settings.minDecibels, max: settings.maxDecibels });
+  const autoMaxRef = useRef(settings.maxDecibels);
+  const floatDataRef = useRef<Float32Array<ArrayBuffer> | null>(null);
   const bassFilterRef = useRef<BiquadFilterNode | null>(null);
   const midFilterRef = useRef<BiquadFilterNode | null>(null);
   const trebleFilterRef = useRef<BiquadFilterNode | null>(null);
@@ -94,41 +132,48 @@ export function useAudioEngine(settings: VisualizerSettings) {
 
       // Create Analyser Node
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = settings.fftSize;
-      analyser.smoothingTimeConstant = settings.smoothing;
-      analyser.minDecibels = settings.minDecibels;
-      analyser.maxDecibels = settings.maxDecibels;
+      analyser.fftSize = settingsRef.current.fftSize;
+      analyser.smoothingTimeConstant = settingsRef.current.smoothing;
+      analyser.minDecibels = settingsRef.current.minDecibels;
+      analyser.maxDecibels = settingsRef.current.maxDecibels;
       analyserRef.current = analyser;
 
       // Equalizer nodes
       const bassFilter = ctx.createBiquadFilter();
       bassFilter.type = 'lowshelf';
       bassFilter.frequency.value = 250;
-      bassFilter.gain.value = engineState.bassGain;
+      bassFilter.gain.value = engineStateRef.current.bassGain;
 
       const midFilter = ctx.createBiquadFilter();
       midFilter.type = 'peaking';
       midFilter.frequency.value = 1000;
       midFilter.Q.value = 1.0;
-      midFilter.gain.value = engineState.midGain;
+      midFilter.gain.value = engineStateRef.current.midGain;
 
       const trebleFilter = ctx.createBiquadFilter();
       trebleFilter.type = 'highshelf';
       trebleFilter.frequency.value = 4000;
-      trebleFilter.gain.value = engineState.trebleGain;
+      trebleFilter.gain.value = engineStateRef.current.trebleGain;
 
       // Panner Node
       const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-      if (panner) panner.pan.value = engineState.pan;
+      if (panner) panner.pan.value = engineStateRef.current.pan;
+
+      // Input gain: the first node every source (mic, file, sample, url) feeds,
+      // so the analyser, EQ and meters all see the boosted/attenuated signal.
+      const inputGain = ctx.createGain();
+      inputGain.gain.value = dbToLinear(optionsRef.current.gain.inputGainDb);
+      inputGain.connect(bassFilter);
+      inputGainRef.current = inputGain;
 
       // Master Gain
       const masterGain = ctx.createGain();
-      masterGain.gain.value = engineState.isMuted ? 0 : engineState.volume;
+      masterGain.gain.value = computeOutputGain(engineStateRef.current);
 
       const mediaStreamDestination = ctx.createMediaStreamDestination();
       masterGain.connect(mediaStreamDestination);
 
-      // Chain: Source -> Bass -> Mid -> Treble -> (Panner) -> Analyser -> Master Gain -> Destination
+      // Chain: Source -> InputGain -> Bass -> Mid -> Treble -> (Panner) -> Analyser -> Master Gain -> Destination
       bassFilter.connect(midFilter);
       midFilter.connect(trebleFilter);
 
@@ -158,21 +203,24 @@ export function useAudioEngine(settings: VisualizerSettings) {
     if (audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
     }
-  }, [settings.fftSize, settings.smoothing, settings.minDecibels, settings.maxDecibels, engineState.bassGain, engineState.midGain, engineState.trebleGain, engineState.pan, engineState.isMuted, engineState.volume]);
+  }, []);
 
   // Sync Analyser Settings
   useEffect(() => {
     if (analyserRef.current) {
       analyserRef.current.fftSize = settings.fftSize;
       analyserRef.current.smoothingTimeConstant = settings.smoothing;
-      analyserRef.current.minDecibels = settings.minDecibels;
-      analyserRef.current.maxDecibels = settings.maxDecibels;
+      // (Re)set the dB window; auto-range then slides it from the metrics loop.
+      setAnalyserRange(analyserRef.current, settings.minDecibels, settings.maxDecibels);
+      autoMaxRef.current = settings.maxDecibels;
+      rangeRef.current = { min: settings.minDecibels, max: settings.maxDecibels };
 
       const bufferLength = analyserRef.current.frequencyBinCount;
       frequencyDataRef.current = new Uint8Array(bufferLength);
       timeDataRef.current = new Uint8Array(bufferLength);
+      floatDataRef.current = new Float32Array(bufferLength);
     }
-  }, [settings.fftSize, settings.smoothing, settings.minDecibels, settings.maxDecibels]);
+  }, [settings.fftSize, settings.smoothing, settings.minDecibels, settings.maxDecibels, settings.autoRange]);
 
   // Clean up source node
   const stopSourceNode = useCallback(() => {
@@ -209,15 +257,15 @@ export function useAudioEngine(settings: VisualizerSettings) {
     (offsetSec: number) => {
       initAudioGraph();
       const ctx = audioCtxRef.current;
-      const bassFilter = bassFilterRef.current;
-      if (!ctx || !bassFilter || !audioBufferRef.current) return;
+      const inputGain = inputGainRef.current;
+      if (!ctx || !inputGain || !audioBufferRef.current) return;
 
       stopSourceNode();
 
       const source = ctx.createBufferSource();
       source.buffer = audioBufferRef.current;
       source.playbackRate.value = engineState.playbackRate;
-      source.connect(bassFilter);
+      source.connect(inputGain);
 
       const duration = audioBufferRef.current.duration;
       const startOffset = Math.max(0, Math.min(offsetSec, duration));
@@ -278,6 +326,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
         isPlaying: false,
         isPaused: false,
         micActive: false,
+        micInfo: null,
       }));
     },
     [initAudioGraph, stopSourceNode]
@@ -308,6 +357,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
           isPlaying: false,
           isPaused: false,
           micActive: false,
+          micInfo: null,
         }));
 
         // Auto play on upload
@@ -353,6 +403,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
           isPlaying: false,
           isPaused: false,
           micActive: false,
+          micInfo: null,
           urlLoading: false,
           urlError: null,
         }));
@@ -480,56 +531,67 @@ export function useAudioEngine(settings: VisualizerSettings) {
     }
   }, [refreshAudioDevices]);
 
-  // Enable Microphone Input
-  const enableMicrophone = useCallback(async (targetDeviceId?: string) => {
+  // Enable Microphone Input.
+  // Capture constraints come from the persisted Input settings (all browser voice
+  // processing defaults to OFF so the spectrum reflects the raw signal).
+  const enableMicrophone = useCallback(async (targetDeviceId?: unknown) => {
     initAudioGraph();
     const ctx = audioCtxRef.current;
-    const bassFilter = bassFilterRef.current;
-    if (!ctx || !bassFilter) return;
+    const inputGain = inputGainRef.current;
+    if (!ctx || !inputGain) return;
 
     stopSourceNode();
     setLoadedFile(null);
 
-    const deviceToUse = targetDeviceId || engineState.selectedDeviceId;
+    // Guard: onClick={enableMicrophone} passes a click event, not a device id.
+    const requested = typeof targetDeviceId === 'string' ? targetDeviceId : undefined;
+    const deviceToUse = requested || engineStateRef.current.selectedDeviceId;
+    const { echoCancellation, noiseSuppression, autoGainControl } = optionsRef.current.input;
+    const processing = { echoCancellation, noiseSuppression, autoGainControl };
 
     try {
-      let audioConstraints: boolean | MediaTrackConstraints = {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-      };
-
-      if (deviceToUse && deviceToUse !== 'default') {
-        audioConstraints = {
-          deviceId: { exact: deviceToUse },
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        };
-      }
-
       let stream: MediaStream;
       try {
+        const audioConstraints: MediaTrackConstraints =
+          deviceToUse && deviceToUse !== 'default'
+            ? { deviceId: { exact: deviceToUse }, ...processing }
+            : { ...processing };
         stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
       } catch (exactErr) {
         console.warn('Exact device constraint failed, falling back to general audio request', exactErr);
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        });
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { ...processing } });
       }
 
       mediaStreamRef.current = stream;
       const micSource = ctx.createMediaStreamSource(stream);
-      micSource.connect(bassFilter);
+      micSource.connect(inputGain);
       micSourceRef.current = micSource;
 
-      if (masterGainRef.current) {
-        // Mute speaker output if micMonitoring is false to prevent feedback while analyzing
-        masterGainRef.current.gain.value = engineState.micMonitoring ? (engineState.isMuted ? 0 : engineState.volume) : 0;
+      const track = stream.getAudioTracks()[0];
+      let micInfo: MicTrackInfo | null = null;
+      let activeDeviceId: string | null = null;
+      if (track) {
+        const ts = track.getSettings();
+        activeDeviceId = ts.deviceId ?? null;
+        micInfo = {
+          label: track.label || 'Microphone',
+          channelCount: ts.channelCount ?? null,
+          sampleRate: ts.sampleRate ?? null,
+          echoCancellation: ts.echoCancellation ?? null,
+          noiseSuppression: ts.noiseSuppression ?? null,
+          autoGainControl: ts.autoGainControl ?? null,
+        };
+        // Device unplugged / permission revoked
+        track.addEventListener('ended', () => {
+          if (mediaStreamRef.current === stream) {
+            mediaStreamRef.current = null;
+            setEngineState((prev) =>
+              prev.sourceType === 'mic'
+                ? { ...prev, micActive: false, isPlaying: false, isPaused: true, micInfo: null, micError: 'Input device disconnected.' }
+                : prev
+            );
+          }
+        });
       }
 
       // Refresh labels after permission grant
@@ -544,7 +606,8 @@ export function useAudioEngine(settings: VisualizerSettings) {
         micError: null,
         currentTime: 0,
         duration: 0,
-        selectedDeviceId: deviceToUse || prev.selectedDeviceId,
+        micInfo,
+        selectedDeviceId: deviceToUse || activeDeviceId || prev.selectedDeviceId,
       }));
     } catch (err) {
       console.error('Microphone access denied or error:', err);
@@ -552,9 +615,31 @@ export function useAudioEngine(settings: VisualizerSettings) {
         ...prev,
         micError: 'Microphone permission denied or unavailable.',
         micActive: false,
+        micInfo: null,
       }));
     }
-  }, [initAudioGraph, stopSourceNode, engineState.selectedDeviceId, engineState.micMonitoring, engineState.isMuted, engineState.volume, refreshAudioDevices]);
+  }, [initAudioGraph, stopSourceNode, refreshAudioDevices]);
+
+  // Stop capturing (releases the mic so the browser's recording indicator goes off)
+  const stopMicrophone = useCallback(() => {
+    stopSourceNode();
+    setEngineState((prev) => ({
+      ...prev,
+      isPlaying: false,
+      isPaused: true,
+      micActive: false,
+      micInfo: null,
+    }));
+  }, [stopSourceNode]);
+
+  // Load a procedural sample and start it immediately (no stale-closure source check)
+  const playSample = useCallback(
+    async (trackId: string) => {
+      await loadSampleTrack(trackId);
+      playBufferFrom(0);
+    },
+    [loadSampleTrack, playBufferFrom]
+  );
 
   // Audio Control Methods
   const play = useCallback(() => {
@@ -575,8 +660,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
 
   const pause = useCallback(() => {
     if (engineState.sourceType === 'mic') {
-      stopSourceNode();
-      setEngineState((prev) => ({ ...prev, isPlaying: false, isPaused: true }));
+      stopMicrophone();
       return;
     }
 
@@ -591,7 +675,7 @@ export function useAudioEngine(settings: VisualizerSettings) {
         currentTime: pausedTimeRef.current,
       }));
     }
-  }, [engineState.sourceType, engineState.isPlaying, engineState.playbackRate, engineState.duration, stopSourceNode]);
+  }, [engineState.sourceType, engineState.isPlaying, engineState.playbackRate, engineState.duration, stopSourceNode, stopMicrophone]);
 
   const seek = useCallback(
     (timeSeconds: number) => {
@@ -610,43 +694,42 @@ export function useAudioEngine(settings: VisualizerSettings) {
   );
 
   const setVolume = useCallback((volume: number) => {
-    setEngineState((prev) => {
-      if (masterGainRef.current) {
-        if (prev.sourceType === 'mic' && !prev.micMonitoring) {
-          masterGainRef.current.gain.value = 0;
-        } else {
-          masterGainRef.current.gain.value = prev.isMuted ? 0 : volume;
-        }
-      }
-      return { ...prev, volume };
-    });
+    setEngineState((prev) => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
   }, []);
 
   const toggleMute = useCallback(() => {
-    setEngineState((prev) => {
-      const nextMute = !prev.isMuted;
-      if (masterGainRef.current) {
-        if (prev.sourceType === 'mic' && !prev.micMonitoring) {
-          masterGainRef.current.gain.value = 0;
-        } else {
-          masterGainRef.current.gain.value = nextMute ? 0 : prev.volume;
-        }
-      }
-      return { ...prev, isMuted: nextMute };
-    });
+    setEngineState((prev) => ({ ...prev, isMuted: !prev.isMuted }));
   }, []);
 
   const toggleMicMonitoring = useCallback(() => {
-    setEngineState((prev) => {
-      const next = !prev.micMonitoring;
-      if (masterGainRef.current) {
-        if (prev.sourceType === 'mic') {
-          masterGainRef.current.gain.value = next ? (prev.isMuted ? 0 : prev.volume) : 0;
-        }
-      }
-      return { ...prev, micMonitoring: next };
-    });
+    setEngineState((prev) => ({ ...prev, micMonitoring: !prev.micMonitoring }));
   }, []);
+
+  const setSelectedDevice = useCallback((deviceId: string | null) => {
+    setEngineState((prev) => (prev.selectedDeviceId === deviceId ? prev : { ...prev, selectedDeviceId: deviceId }));
+  }, []);
+
+  const setMicMonitoring = useCallback((on: boolean) => {
+    setEngineState((prev) => (prev.micMonitoring === on ? prev : { ...prev, micMonitoring: on }));
+  }, []);
+
+  // Single source of truth for the speaker level (see computeOutputGain). Runs after
+  // every relevant state change so switching mic → file never leaves output silenced.
+  useEffect(() => {
+    const ctx = audioCtxRef.current;
+    const master = masterGainRef.current;
+    if (!ctx || !master) return;
+    master.gain.setTargetAtTime(computeOutputGain(engineState), ctx.currentTime, 0.015);
+  }, [engineState.sourceType, engineState.micMonitoring, engineState.isMuted, engineState.volume]);
+
+  // Input gain (dB) → GainNode, applies to every source type
+  const inputGainDb = options.gain.inputGainDb;
+  useEffect(() => {
+    const ctx = audioCtxRef.current;
+    const node = inputGainRef.current;
+    if (!ctx || !node) return;
+    node.gain.setTargetAtTime(dbToLinear(inputGainDb), ctx.currentTime, 0.02);
+  }, [inputGainDb]);
 
   const setEq = useCallback((bassGain: number, midGain: number, trebleGain: number) => {
     setEngineState((prev) => {
@@ -716,6 +799,32 @@ export function useAudioEngine(settings: VisualizerSettings) {
           const elapsed = (audioCtxRef.current.currentTime - startTimeRef.current) * currentEngine.playbackRate;
           if (elapsed <= currentEngine.duration) {
             setEngineState((prev) => ({ ...prev, currentTime: elapsed }));
+          }
+        }
+
+        // Auto-range: slide the analyser's dB window so the loudest bin sits ~8 dB
+        // below the top. Fast attack, slow release, window width stays as configured.
+        if (currentSettings.autoRange && analyserRef.current && floatDataRef.current && (currentEngine.isPlaying || currentEngine.micActive)) {
+          const an = analyserRef.current;
+          if (floatDataRef.current.length !== an.frequencyBinCount) {
+            floatDataRef.current = new Float32Array(an.frequencyBinCount);
+          }
+          an.getFloatFrequencyData(floatDataRef.current);
+          let peakDb = -Infinity;
+          for (let i = 1; i < floatDataRef.current.length; i++) {
+            if (floatDataRef.current[i] > peakDb) peakDb = floatDataRef.current[i];
+          }
+          if (Number.isFinite(peakDb) && peakDb > -110) {
+            const span = currentSettings.maxDecibels - currentSettings.minDecibels;
+            const target = Math.max(currentSettings.minDecibels + span * 0.5, Math.min(0, peakDb + 8));
+            const cur = autoMaxRef.current;
+            const next = cur + (target - cur) * (target > cur ? 0.5 : 0.04);
+            autoMaxRef.current = next;
+            const newMin = Math.max(-140, next - span);
+            if (Math.abs(an.maxDecibels - next) > 0.25) {
+              setAnalyserRange(an, newMin, next);
+              rangeRef.current = { min: newMin, max: next };
+            }
           }
         }
 
@@ -820,5 +929,11 @@ export function useAudioEngine(settings: VisualizerSettings) {
     getTimeDomainData,
     mediaStreamDestinationRef,
     loadedFile,
+    stopMicrophone,
+    playSample,
+    setMicMonitoring,
+    setSelectedDevice,
+    refreshAudioDevices,
+    rangeRef,
   };
 }

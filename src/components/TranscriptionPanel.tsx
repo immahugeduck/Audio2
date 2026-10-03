@@ -111,11 +111,11 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-300">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-sage-500/20 border border-emerald-500/30 text-emerald-300">
             <FileText className="w-5 h-5" />
           </div>
           <div>
@@ -125,7 +125,7 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
                 Gemini AI
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Transcribe any active playbacks, mic recordings, or uploaded audio files directly
             </p>
           </div>
@@ -145,13 +145,13 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
       {/* Options Panel Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Stream Recorder Column */}
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/85 flex flex-col justify-between gap-3">
+        <div className="bg-ink-950 p-4 rounded-xl border border-ink-800/85 flex flex-col justify-between gap-3">
           <div>
-            <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-1">
+            <h4 className="text-xs font-bold text-ink-200 flex items-center gap-1.5 mb-1">
               <Mic className="w-3.5 h-3.5 text-emerald-400" />
               Live / Playback Snippet
             </h4>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-ink-400">
               Record a custom snippet of the currently playing preset, live mic stream, or any active playback, then transcribe it.
             </p>
           </div>
@@ -181,10 +181,10 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
         </div>
 
         {/* Direct Uploaded File Column */}
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/85 flex flex-col justify-between gap-3">
+        <div className="bg-ink-950 p-4 rounded-xl border border-ink-800/85 flex flex-col justify-between gap-3">
           <div>
-            <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-1">
-              <Upload className="w-3.5 h-3.5 text-cyan-400" />
+            <h4 className="text-xs font-bold text-ink-200 flex items-center gap-1.5 mb-1">
+              <Upload className="w-3.5 h-3.5 text-accent-400" />
               Direct File Transcription
             </h4>
             {loadedFile ? (
@@ -193,7 +193,7 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
                 File Ready: <span className="font-semibold truncate max-w-[150px]">{loadedFile.name}</span>
               </p>
             ) : (
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-ink-400">
                 Upload an audio file in the "Audio Sources" section to transcribe the entire file instantly without manual recording.
               </p>
             )}
@@ -203,7 +203,7 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
             onClick={handleDirectFileTranscription}
             disabled={isTranscribing || isRecording || !loadedFile}
             id="btn-transcribe-file-direct"
-            className="w-full py-2 px-3 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full py-2 px-3 rounded-lg bg-accent-500/10 hover:bg-accent-500/25 border border-accent-500/30 text-accent-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             title={loadedFile ? "Transcribe uploaded file directly" : "Please upload an audio file first"}
           >
             <Upload className="w-3.5 h-3.5" />
@@ -222,22 +222,22 @@ export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
 
       {/* Output Panel */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-slate-400 font-medium">Transcription Output</label>
-        <div className="bg-slate-950 border border-slate-800/90 rounded-xl p-4 min-h-[120px] flex flex-col relative overflow-hidden shadow-inner">
+        <label className="text-xs text-ink-400 font-medium">Transcription Output</label>
+        <div className="bg-ink-950 border border-ink-800/90 rounded-xl p-4 min-h-[120px] flex flex-col relative overflow-hidden shadow-inner">
           {isTranscribing ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-xs z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink-950/80 backdrop-blur-xs z-10">
               <Loader2 className="w-7 h-7 text-emerald-400 animate-spin" />
               <span className="text-xs text-emerald-300 font-semibold animate-pulse tracking-wide">
                 Gemini AI transcribing audio...
               </span>
             </div>
           ) : transcription ? (
-            <div className="text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-wrap font-sans">
+            <div className="text-xs sm:text-sm text-ink-100 leading-relaxed whitespace-pre-wrap font-sans">
               {transcription}
             </div>
           ) : (
-            <div className="m-auto text-xs text-slate-500 flex flex-col items-center gap-2 text-center py-4">
-              <FileText className="w-7 h-7 text-slate-600" />
+            <div className="m-auto text-xs text-ink-500 flex flex-col items-center gap-2 text-center py-4">
+              <FileText className="w-7 h-7 text-ink-500" />
               <span>
                 Transcription text will display here once recording is complete or file is processed.
               </span>

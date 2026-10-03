@@ -172,11 +172,11 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-xl flex flex-col gap-5">
+    <div className="bg-ink-900/90 rounded-2xl border border-ink-800 p-4 sm:p-5 shadow-xl flex flex-col gap-5">
       {/* Module Title Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-red-500/20 to-cyan-500/20 border border-red-500/30 text-red-400">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-red-500/20 to-accent-500/20 border border-red-500/30 text-red-400">
             <Youtube className="w-5 h-5" />
           </div>
           <div>
@@ -186,14 +186,14 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                 LIVE WEB STREAM
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Input YouTube videos, podcasts, MP3 links, or web radio streams to analyze frequencies live.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-500 font-mono">
             CORS & HTML5 Audio Stream Ready
           </span>
         </div>
@@ -202,11 +202,11 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
       {/* Main URL Input Box */}
       <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
         <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-500">
             {inputUrl.includes('youtube.com') || inputUrl.includes('youtu.be') ? (
               <Youtube className="w-4 h-4 text-red-400" />
             ) : (
-              <Globe className="w-4 h-4 text-cyan-400" />
+              <Globe className="w-4 h-4 text-accent-400" />
             )}
           </div>
           <input
@@ -216,7 +216,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyzeUrl()}
             placeholder="Paste YouTube Link (e.g. https://www.youtube.com/watch?v=...) or Direct Audio URL (.mp3, .wav)..."
             id="input-stream-url"
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-mono"
+            className="w-full pl-10 pr-4 py-2.5 bg-ink-950 border border-ink-800 rounded-xl text-xs text-ink-100 placeholder-ink-500 focus:outline-none focus:border-accent-500 transition-all font-mono"
           />
         </div>
 
@@ -224,7 +224,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
           onClick={() => handleAnalyzeUrl()}
           disabled={!inputUrl.trim() || engineState.urlLoading}
           id="btn-analyze-url"
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-cyan-500 hover:opacity-90 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95 whitespace-nowrap"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-accent-500 hover:opacity-90 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95 whitespace-nowrap"
         >
           {engineState.urlLoading ? (
             <>
@@ -246,7 +246,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
           <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
           <div className="flex-1">
             <strong className="font-bold">Audio Fetch Warning:</strong> {engineState.urlError}
-            <div className="mt-1 text-[11px] text-slate-400">
+            <div className="mt-1 text-[11px] text-ink-400">
               Tip: For restricted CORS links, try using YouTube links or built-in stream presets below.
             </div>
           </div>
@@ -255,18 +255,18 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
 
       {/* YouTube Active Stream Container */}
       {activeYoutubeId && (
-        <div className="bg-slate-950 border border-red-500/30 rounded-2xl p-4 flex flex-col gap-3 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+        <div className="bg-ink-950 border border-red-500/30 rounded-2xl p-4 flex flex-col gap-3 shadow-2xl relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-800 pb-2">
             <div className="flex items-center gap-2 text-xs font-bold text-white">
               <Youtube className="w-4 h-4 text-red-500" />
               <span>Active YouTube Video Stream:</span>
-              <span className="font-mono text-slate-400 text-[11px]">ID: {activeYoutubeId}</span>
+              <span className="font-mono text-ink-400 text-[11px]">ID: {activeYoutubeId}</span>
             </div>
             <a
               href={`https://www.youtube.com/watch?v=${activeYoutubeId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1"
+              className="text-[11px] text-accent-400 hover:underline flex items-center gap-1"
             >
               Open on YouTube <ExternalLink className="w-3 h-3" />
             </a>
@@ -274,7 +274,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             {/* Embedded YouTube Player */}
-            <div className="md:col-span-2 aspect-video w-full rounded-xl overflow-hidden border border-slate-800 bg-black shadow-inner">
+            <div className="md:col-span-2 aspect-video w-full rounded-xl overflow-hidden border border-ink-800 bg-black shadow-inner">
               <iframe
                 src={`https://www.youtube.com/embed/${activeYoutubeId}?autoplay=1&rel=0`}
                 title="YouTube Video Player"
@@ -286,28 +286,28 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
             </div>
 
             {/* Honest disclosure: the analyzer does NOT see this video's audio */}
-            <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between h-full text-xs gap-3">
+            <div className="bg-ink-900 p-3.5 rounded-xl border border-ink-800 flex flex-col justify-between h-full text-xs gap-3">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                   Video Plays Here Only
                 </span>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
+                <p className="text-[11px] text-ink-300 leading-relaxed">
                   YouTube doesn't allow pulling raw audio out of a video stream in the browser, so the spectrum analyzer
-                  above <strong className="text-slate-100">is not reading this video's audio</strong>. It's showing whatever
+                  above <strong className="text-ink-100">is not reading this video's audio</strong>. It's showing whatever
                   source is currently active.
                 </p>
-                <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex items-center gap-2">
-                  <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <div className="bg-ink-950 p-2.5 rounded-lg border border-ink-800 text-[11px] text-ink-300 flex items-center gap-2">
+                  <Info className="w-3.5 h-3.5 text-accent-400 shrink-0" />
                   <span>To actually analyze this video's sound, play it aloud and use Mic Loopback below.</span>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
+              <div className="flex flex-col gap-2 pt-2 border-t border-ink-800">
                 <button
                   onClick={enableMicrophone}
                   id="btn-yt-mic-loopback"
-                  className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-3 py-2 rounded-lg bg-ink-800 hover:bg-ink-700 border border-ink-700 text-ink-200 text-[11px] font-semibold flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <Radio className="w-3.5 h-3.5 text-rose-400" />
                   Use Mic / System Loopback to Analyze Real Audio
@@ -320,7 +320,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
 
       {/* Preset Fast-Load Streams */}
       <div className="flex flex-col gap-2.5">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+        <span className="text-[10px] font-bold text-ink-400 uppercase tracking-wider flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           Featured Stream & YouTube Demo Presets
         </span>
@@ -333,7 +333,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                 handleAnalyzeUrl(preset.url);
               }}
               id={`preset-btn-${preset.id}`}
-              className="p-3 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/50 rounded-xl text-left flex flex-col justify-between gap-2 transition-all cursor-pointer group"
+              className="p-3 bg-ink-950 hover:bg-ink-800/80 border border-ink-800 hover:border-accent-500/50 rounded-xl text-left flex flex-col justify-between gap-2 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between gap-2">
                 {preset.type === 'youtube' ? (
@@ -341,16 +341,16 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                     <Youtube className="w-3 h-3" /> YouTube
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-400 flex items-center gap-1">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-accent-500/20 text-accent-400 flex items-center gap-1">
                     <Globe className="w-3 h-3" /> Audio Stream
                   </span>
                 )}
-                <Zap className="w-3.5 h-3.5 text-slate-600 group-hover:text-amber-400 transition-colors" />
+                <Zap className="w-3.5 h-3.5 text-ink-500 group-hover:text-amber-400 transition-colors" />
               </div>
-              <span className="text-xs font-semibold text-slate-200 group-hover:text-white line-clamp-2">
+              <span className="text-xs font-semibold text-ink-200 group-hover:text-white line-clamp-2">
                 {preset.title}
               </span>
-              <span className="text-[10px] font-mono text-cyan-400 flex items-center gap-1">
+              <span className="text-[10px] font-mono text-accent-400 flex items-center gap-1">
                 Click to Analyze <ExternalLink className="w-2.5 h-2.5" />
               </span>
             </button>
@@ -360,15 +360,15 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
 
       {/* Recent URL History List */}
       {history.length > 0 && (
-        <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
+        <div className="flex flex-col gap-2 pt-2 border-t border-ink-800">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <History className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[10px] font-bold text-ink-400 uppercase tracking-wider flex items-center gap-1.5">
+              <History className="w-3.5 h-3.5 text-accent-400" />
               Recent Analyzed Stream History
             </span>
             <button
               onClick={() => setHistory([])}
-              className="text-[10px] text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+              className="text-[10px] text-ink-500 hover:text-rose-400 transition-colors cursor-pointer"
             >
               Clear History
             </button>
@@ -378,17 +378,17 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
             {history.map((item) => (
               <div
                 key={item.id}
-                className="bg-slate-950 p-2.5 rounded-xl border border-slate-850 flex items-center justify-between gap-3 text-xs hover:border-slate-700 transition-all"
+                className="bg-ink-950 p-2.5 rounded-xl border border-ink-850 flex items-center justify-between gap-3 text-xs hover:border-ink-700 transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {item.type === 'youtube' ? (
                     <Youtube className="w-4 h-4 text-red-500 shrink-0" />
                   ) : (
-                    <Music className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <Music className="w-4 h-4 text-accent-400 shrink-0" />
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-slate-200 font-medium truncate">{item.title}</span>
-                    <span className="text-[10px] font-mono text-slate-500 truncate">{item.url}</span>
+                    <span className="text-ink-200 font-medium truncate">{item.title}</span>
+                    <span className="text-[10px] font-mono text-ink-500 truncate">{item.url}</span>
                   </div>
                 </div>
 
@@ -399,7 +399,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                       handleAnalyzeUrl(item.url);
                     }}
                     title="Re-analyze Stream"
-                    className="p-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 rounded-lg border border-cyan-500/30 transition-all cursor-pointer"
+                    className="p-1.5 bg-accent-500/10 hover:bg-accent-500/20 text-accent-300 rounded-lg border border-accent-500/30 transition-all cursor-pointer"
                   >
                     <Play className="w-3 h-3 fill-current" />
                   </button>
@@ -407,7 +407,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                   <button
                     onClick={() => handleCopyLink(item.url, item.id)}
                     title="Copy URL"
-                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all cursor-pointer"
+                    className="p-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 rounded-lg transition-all cursor-pointer"
                   >
                     {copiedId === item.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   </button>
@@ -415,7 +415,7 @@ export const UrlAudioAnalyzer: React.FC<UrlAudioAnalyzerProps> = ({
                   <button
                     onClick={() => handleDeleteHistory(item.id)}
                     title="Delete item"
-                    className="p-1.5 bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 rounded-lg transition-all cursor-pointer"
+                    className="p-1.5 bg-ink-800 hover:bg-rose-500/20 text-ink-400 hover:text-rose-300 rounded-lg transition-all cursor-pointer"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>

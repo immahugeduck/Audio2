@@ -1,4 +1,4 @@
-export type VisualizationMode = 'bars' | 'curve' | 'waterfall' | 'spectrogram' | 'waveform' | 'hybrid';
+export type VisualizationMode = 'bars' | 'curve' | 'radial' | 'waterfall' | 'spectrogram' | 'waveform' | 'hybrid';
 
 export type AudioSourceType = 'sample' | 'file' | 'mic' | 'url';
 
@@ -42,6 +42,33 @@ export interface VisualizerSettings {
   fillOpacity: number; // 0.1 - 1.0
   barSpacing: number; // 1 - 8
   barWidthMultiplier: number; // 0.5 - 2.0
+  autoRange: boolean; // follow the signal: slide the dB window so the loudest peak sits near the top
+}
+
+/** Microphone / capture settings (passed straight to getUserMedia). */
+export interface InputSettings {
+  deviceId: string | null; // remembered mic selection (null = system default)
+  echoCancellation: boolean;
+  noiseSuppression: boolean;
+  autoGainControl: boolean;
+  monitoring: boolean; // route the mic to the speakers
+  autoStart: boolean; // start the mic automatically on launch
+}
+
+export interface GainSettings {
+  inputGainDb: number; // pre-analysis gain on every source, -12 … +24 dB
+  outputVolume: number; // 0 … 1 master output
+}
+
+export interface AppearanceSettings {
+  accentId: string; // see utils/theme.ts
+}
+
+export interface AppSettings {
+  visual: VisualizerSettings;
+  input: InputSettings;
+  gain: GainSettings;
+  appearance: AppearanceSettings;
 }
 
 export interface AudioInputDevice {
@@ -77,6 +104,17 @@ export interface AudioEngineState {
   isBluetoothConnected: boolean;
   bluetoothDeviceName: string | null;
   phoneMicDeviceName: string | null;
+  /** What the browser actually granted the active mic track (null when not capturing). */
+  micInfo: MicTrackInfo | null;
+}
+
+export interface MicTrackInfo {
+  label: string;
+  channelCount: number | null;
+  sampleRate: number | null;
+  echoCancellation: boolean | null;
+  noiseSuppression: boolean | null;
+  autoGainControl: boolean | null;
 }
 
 export interface AudioMetrics {

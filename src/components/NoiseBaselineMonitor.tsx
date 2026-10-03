@@ -22,7 +22,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
   // SNR quality status
   const getSnrBadge = (snr: number) => {
     if (snr >= 25) return { label: 'Pristine Signal', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
-    if (snr >= 15) return { label: 'Good Headroom', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' };
+    if (snr >= 15) return { label: 'Good Headroom', color: 'text-accent-400 bg-accent-500/10 border-accent-500/30' };
     if (snr >= 8) return { label: 'Moderate Noise', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
     return { label: 'High Background Noise', color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' };
   };
@@ -30,11 +30,11 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
   const snrBadge = getSnrBadge(profile.snrDb);
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+    <div className="bg-ink-900/90 border border-ink-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-cyan-400">
+          <div className="p-2 rounded-xl bg-ink-950 border border-ink-800 text-accent-400">
             <VolumeX className="w-5 h-5" />
           </div>
           <div>
@@ -47,7 +47,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
                 </span>
               )}
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Long-term noise floor profiling, room acoustics NC rating & SNR tracking
             </p>
           </div>
@@ -61,7 +61,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer ${
             isCalibrating
               ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-              : 'bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+              : 'bg-ink-950 border-ink-800 text-ink-300 hover:text-white hover:border-ink-700'
           } ${!isListening ? 'opacity-50 cursor-not-allowed' : ''}`}
           title="Sample room ambient silence for 3 seconds to establish baseline floor"
         >
@@ -72,7 +72,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
 
       {/* Calibration Progress Bar */}
       {isCalibrating && (
-        <div className="w-full bg-slate-950 rounded-full h-1.5 border border-slate-800 overflow-hidden">
+        <div className="w-full bg-ink-950 rounded-full h-1.5 border border-ink-800 overflow-hidden">
           <div
             className="bg-amber-500 h-full transition-all duration-100"
             style={{ width: `${profile.calibrationProgress}%` }}
@@ -83,22 +83,22 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
       {/* Primary Baseline Metric Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Noise Floor dB */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-medium text-slate-400 flex items-center justify-between">
+        <div className="bg-ink-950/80 border border-ink-800/80 rounded-xl p-3 flex flex-col justify-between">
+          <div className="text-[11px] font-medium text-ink-400 flex items-center justify-between">
             <span>Noise Floor</span>
-            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+            <Activity className="w-3.5 h-3.5 text-accent-400" />
           </div>
           <div className="mt-2">
-            <span className="text-xl font-bold font-mono text-cyan-300">
-              {profile.noiseFloorDb} <span className="text-xs text-slate-400">dB</span>
+            <span className="text-xl font-bold font-mono text-accent-300">
+              {profile.noiseFloorDb} <span className="text-xs text-ink-400">dB</span>
             </span>
-            <p className="text-[10px] text-slate-500 mt-0.5">Ambient quiet level</p>
+            <p className="text-[10px] text-ink-500 mt-0.5">Ambient quiet level</p>
           </div>
         </div>
 
         {/* Signal-to-Noise Ratio (SNR) */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-medium text-slate-400 flex items-center justify-between">
+        <div className="bg-ink-950/80 border border-ink-800/80 rounded-xl p-3 flex flex-col justify-between">
+          <div className="text-[11px] font-medium text-ink-400 flex items-center justify-between">
             <span>Signal / Noise Ratio</span>
             <BarChart2 className="w-3.5 h-3.5 text-emerald-400" />
           </div>
@@ -107,7 +107,7 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
               <span className="text-xl font-bold font-mono text-emerald-300">
                 +{profile.snrDb}
               </span>
-              <span className="text-xs text-slate-400">dB SNR</span>
+              <span className="text-xs text-ink-400">dB SNR</span>
             </div>
             <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-semibold border ${snrBadge.color}`}>
               {snrBadge.label}
@@ -116,28 +116,28 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
         </div>
 
         {/* Room Noise Rating (NC) */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-medium text-slate-400 flex items-center justify-between">
+        <div className="bg-ink-950/80 border border-ink-800/80 rounded-xl p-3 flex flex-col justify-between">
+          <div className="text-[11px] font-medium text-ink-400 flex items-center justify-between">
             <span>Room Acoustic Rating</span>
-            <Sliders className="w-3.5 h-3.5 text-purple-400" />
+            <Sliders className="w-3.5 h-3.5 text-plum-400" />
           </div>
           <div className="mt-2">
-            <span className="text-xs font-bold text-slate-200 block truncate">
+            <span className="text-xs font-bold text-ink-200 block truncate">
               {profile.noiseCriteriaRating}
             </span>
-            <p className="text-[10px] text-slate-500 mt-0.5">Noise Criteria Standard</p>
+            <p className="text-[10px] text-ink-500 mt-0.5">Noise Criteria Standard</p>
           </div>
         </div>
 
         {/* Transient Spike Counter */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex flex-col justify-between relative group">
-          <div className="text-[11px] font-medium text-slate-400 flex items-center justify-between">
+        <div className="bg-ink-950/80 border border-ink-800/80 rounded-xl p-3 flex flex-col justify-between relative group">
+          <div className="text-[11px] font-medium text-ink-400 flex items-center justify-between">
             <span title="Counts sudden sharp impulsive onsets (>12dB rise or >16dB crest factor)">Impulsive Transients</span>
             <div className="flex items-center gap-1">
               {resetTransients && profile.transientCount > 0 && (
                 <button
                   onClick={resetTransients}
-                  className="text-[10px] text-slate-500 hover:text-amber-300 transition-all cursor-pointer px-1 py-0.5 rounded bg-slate-900 border border-slate-800"
+                  className="text-[10px] text-ink-500 hover:text-amber-300 transition-all cursor-pointer px-1 py-0.5 rounded bg-ink-900 border border-ink-800"
                   title="Reset transient counter"
                 >
                   Reset
@@ -152,37 +152,37 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
                 {profile.transientCount}
               </span>
               {profile.transientsPerMin !== undefined && profile.transientsPerMin > 0 && (
-                <span className="text-[10px] font-mono text-slate-500">
+                <span className="text-[10px] font-mono text-ink-500">
                   ({profile.transientsPerMin}/min)
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-slate-500 mt-0.5">Sudden acoustic bursts / claps</p>
+            <p className="text-[10px] text-ink-500 mt-0.5">Sudden acoustic bursts / claps</p>
           </div>
         </div>
       </div>
 
       {/* Dominant Noise Classification Banner */}
-      <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
+      <div className="bg-ink-950/60 border border-ink-800/80 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-400">Dominant Noise Source:</span>
-          <span className="font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+          <span className="font-semibold text-ink-400">Dominant Noise Source:</span>
+          <span className="font-bold text-accent-300 bg-accent-500/10 border border-accent-500/20 px-2 py-0.5 rounded-md">
             {profile.dominantNoiseBand}
           </span>
         </div>
-        <div className="text-[11px] text-slate-500 hidden sm:block">
-          RMS Level: <strong className="text-slate-300">{profile.averageRmsDb} dB</strong>
+        <div className="text-[11px] text-ink-500 hidden sm:block">
+          RMS Level: <strong className="text-ink-300">{profile.averageRmsDb} dB</strong>
         </div>
       </div>
 
       {/* Multi-Band Noise Floor Spectrum Curve */}
-      <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-2">
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+      <div className="bg-ink-950 border border-ink-800/80 rounded-xl p-3 flex flex-col gap-2">
+        <div className="flex items-center justify-between text-[11px] text-ink-400">
           <span className="font-medium flex items-center gap-1.5">
-            <Activity className="w-3 h-3 text-cyan-400" />
+            <Activity className="w-3 h-3 text-accent-400" />
             32-Band Environmental Noise Floor Profile
           </span>
-          <span className="text-[10px] text-slate-500">Low (20Hz) → High (20kHz)</span>
+          <span className="text-[10px] text-ink-500">Low (20Hz) → High (20kHz)</span>
         </div>
 
         {/* Band Bars */}
@@ -192,18 +192,18 @@ export const NoiseBaselineMonitor: React.FC<NoiseBaselineMonitorProps> = ({
             return (
               <div
                 key={idx}
-                className="flex-1 bg-slate-900 rounded-t-sm hover:bg-slate-800 relative group transition-all"
+                className="flex-1 bg-ink-900 rounded-t-sm hover:bg-ink-800 relative group transition-all"
                 style={{ height: '100%' }}
               >
                 <div
-                  className="bg-gradient-to-t from-cyan-600/80 to-cyan-400 rounded-t-sm w-full absolute bottom-0 transition-all duration-300"
+                  className="bg-gradient-to-t from-accent-600/80 to-accent-400 rounded-t-sm w-full absolute bottom-0 transition-all duration-300"
                   style={{ height: `${heightPct}%` }}
                 />
               </div>
             );
           })}
         </div>
-        <div className="flex justify-between text-[9px] text-slate-600 font-mono px-0.5">
+        <div className="flex justify-between text-[9px] text-ink-500 font-mono px-0.5">
           <span>20 Hz</span>
           <span>250 Hz</span>
           <span>2 kHz</span>
